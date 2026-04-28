@@ -1,0 +1,3 @@
+# Deny All
+deny perm=any all : all
+# do not add rules below this point

@@ -1,0 +1,4 @@
+# SmartCard Rules
+allow perm=execute exe=/usr/bin/sssd : trust=1
+allow perm=execute exe=/usr/sbin/pcscd : trust=1
+allow perm=execute dir=/usr/libexec/sssd : trust=1

@@ -1,0 +1,400 @@
+rhel8STIG_allow_system_reboot: true
+# V-230222 RHEL-08-010010
+rhel8STIG_stigrule_230222_Manage: true
+rhel8STIG_stigrule_230222__baseos_Baseurl: https://cdn.redhat.com/content/dist/rhel8/$releasever/x86_64/baseos/os
+rhel8STIG_stigrule_230222__appstream_Baseurl: https://cdn.redhat.com/content/dist/rhel8/$releasever/x86_64/appstream/os
+rhel8STIG_stigrule_230222__dnf_State: latest
+rhel8STIG_stigrule_230222_repo_file: ansible
+# V-230223
+rhel8STIG_stigrule_230223_Manage: true
+# V-230229 RHEL-08-010090
+rhel8STIG_stigrule_230229_Manage: true
+# V-230232
+rhel8STIG_stigrule_230232_Manage: true
+rhel8STIG_stigrule_230232_exempt_users: []
+rhel8STIG_stigrule_230232_protected_accts:
+  - root
+  - sync
+  - halt
+  - shutdown
+# V-230233 RHEL-08-010090
+# rhel8STIG_stigrule_230233_Manage: true
+# rhel8STIG_stigrule_230233_Max: 100000
+# rhel8STIG_stigrule_230233_Min: 100000
+# V-230234
+rhel8STIG_stigrule_230234_Manage: true
+rhel8STIG_stigrule_230234_grub_password: ChangeMe_!@12#$34
+# V-230235
+rhel8STIG_stigrule_230235_Manage: true
+rhel8STIG_stigrule_230235_grub_password: ChangeMe_!@12#$34
+# V-230237 RHEL-08-010160
+rhel8STIG_stigrule_230237_Manage: true
+# V-230238
+rhel8STIG_stigrule_230238_Manage: true
+# V-230243 RHEL-08-010190
+rhel8STIG_stigrule_230243_Manage: true
+rhel8STIG_stigrule_230243_ignore_dirs: []
+# V-230245
+rhel8STIG_stigrule_230245_Manage: true
+# V-230246
+rhel8STIG_stigrule_230246_Manage: true
+# V-230247
+rhel8STIG_stigrule_230247_Manage: true
+# V-230248
+rhel8STIG_stigrule_230248_Manage: true
+# V-230249
+rhel8STIG_stigrule_230249_Manage: true
+# V-230250
+rhel8STIG_stigrule_230250_Manage: true
+# V-230251 RHEL-08-010290
+rhel8STIG_stigrule_230251_Manage: true
+# V-230252 RHEL-08-010291
+rhel8STIG_stigrule_230252_Manage: true
+# V-230253
+rhel8STIG_stigrule_230253_Manage: true
+# V-230254 RHEL-08-010293
+rhel8STIG_stigrule_230254_Manage: true
+# V-230256
+# rhel8STIG_stigrule_230256_Manage: true
+# gnutls_order: +VERS-ALL:-VERS-DTLS0.9:-VERS-SSL3.0:-VERS-TLS1.0:-VERS-TLS1.1:-VERS-DTLS1.0
+# V-230257
+rhel8STIG_stigrule_230257_Manage: true
+# V-230258
+rhel8STIG_stigrule_230258_Manage: true
+# V-230259
+rhel8STIG_stigrule_230259_Manage: true
+rhel8STIG_stigrule_230259_ignore_dirs: []
+rhel8STIG_stigrule_230259_chgrp_acct: root
+# V-230260 RHEL-08-010330
+rhel8STIG_stigrule_230260_Manage: true
+# V-230261 RHEL-08-010340
+rhel8STIG_stigrule_230261_Manage: true
+# V-230262 RHEL-08-010350
+rhel8STIG_stigrule_230262_Manage: true
+# V-230263 RHEL-08-010360
+rhel8STIG_stigrule_230263_Manage: true
+# V-230264 RHEL-08-010370
+rhel8STIG_stigrule_230264_Manage: true
+# V-230271
+rhel8STIG_stigrule_230271_Manage: true
+rhel8STIG_stigrule_230271_sudoers_nopasswd: []
+# V-230272 RHEL-08-010381
+rhel8STIG_stigrule_230272_Manage: true
+# V-230274 RHEL-08-010400
+rhel8STIG_stigrule_230274_Manage: true
+# V-230275 RHEL-08-010410
+# rhel8STIG_stigrule_230275_Manage: true
+# V-230277 RHEL-08-010420
+rhel8STIG_stigrule_230277_Manage: true
+# V-230278 RHEL-08-010422
+rhel8STIG_stigrule_230278_Manage: true
+# V-230279 RHEL-08-010423
+rhel8STIG_stigrule_230279_Manage: true
+# V-230283 RHEL-08-010460
+rhel8STIG_stigrule_230283_Manage: true
+# V-230284 RHEL-08-010470
+rhel8STIG_stigrule_230284_Manage: true
+# V-230285 RHEL-08-010471
+# rhel8STIG_stigrule_230285_Manage: true
+# V-230286 RHEL-08-010480
+rhel8STIG_stigrule_230286_Manage: true
+# V-230287 RHEL-08-010490
+rhel8STIG_stigrule_230287_Manage: true
+# V-230299 RHEL-08-010570
+rhel8STIG_stigrule_230299_Manage: true
+# V-230301 RHEL-08-010580
+rhel8STIG_stigrule_230301_Manage: true
+rhel8STIG_stigrule_230301_exclude_mounts: []
+rhel8STIG_stigrule_230301_exclude_fstypes:
+  - swap
+  - tmpfs
+  - devtmpfs
+  - proc
+  - sysfs
+  - cgroup
+  - cgroup2
+  - nfs
+  - nfs4
+  - cifs
+  - smb
+# V-230302 RHEL-08-010590
+rhel8STIG_stigrule_230302_Manage: true
+# V-230303 RHEL-08-010600
+rhel8STIG_stigrule_230303_Manage: true
+# V-230304 RHEL-08-010610
+rhel8STIG_stigrule_230304_Manage: true
+# V-230305 RHEL-08-010620
+rhel8STIG_stigrule_230305_Manage: true
+# V-230306 RHEL-08-010630
+rhel8STIG_stigrule_230306_Manage: true
+rhel8STIG_stigrule_230306_ignore_dirs: []
+# V-230307 RHEL-08-010640
+rhel8STIG_stigrule_230307_Manage: true
+rhel8STIG_stigrule_230307_ignore_dirs: []
+# V-230308 RHEL-08-010650
+rhel8STIG_stigrule_230308_Manage: true
+rhel8STIG_stigrule_230308_ignore_dirs: []
+# V-230309 RHEL-08-010660
+# rhel8STIG_stigrule_230309_Manage: true
+# rhel8STIG_stigrule_230309_ignore_dirs: []
+# V-230311
+# rhel8STIG_stigrule_230311_Manage: true
+# V-230312 RHEL-08-010672
+rhel8STIG_stigrule_230312_Manage: true
+# V-230316
+rhel8STIG_stigrule_230316_Manage: true
+rhel8STIG_stigrule_230316_nameservers: []
+rhel8STIG_stigrule_230316_cloud: false
+rhel8STIG_stigrule_230316_ignore_dhcp_dns: false
+# rhel8STIG_stigrule_230316_ns1: ns1.ahi.glb.inf.dns.mil
+# rhel8STIG_stigrule_230316_ns2: ns2.ahi.glb.inf.dns.mil
+# V-230317
+rhel8STIG_stigrule_230317_Manage: true
+rhel8STIG_stigrule_230317_dot_bashrc: |
+  # .bashrc
+
+  # Source global definitions
+  if [ -f /etc/bashrc ]; then
+          . /etc/bashrc
+  fi
+
+  # User specific environment
+  if ! [[ "$PATH" =~ "$PATH:$HOME/.local/bin:$HOME/bin:" ]]
+  then
+      PATH="$PATH:$HOME/.local/bin:$HOME/bin"
+  fi
+  export PATH
+
+  # Uncomment the following line if you don't like systemctl's auto-paging feature:
+  # export SYSTEMD_PAGER=
+
+  # User specific aliases and functions
+rhel8STIG_stigrule_230317_exempt_users: []
+# V-230318
+rhel8STIG_stigrule_230318_Manage: true
+rhel8STIG_stigrule_230318_ignore_dirs: []
+# V-230319
+rhel8STIG_stigrule_230319_Manage: true
+rhel8STIG_stigrule_230319_ignore_dirs: []
+# V-230320
+rhel8STIG_stigrule_230320_Manage: true
+# V-230321
+rhel8STIG_stigrule_230321_Manage: true
+rhel8STIG_stigrule_230321_mode: '0700' # '0700' is the default permissions on folders set by RHEL
+rhel8STIG_stigrule_230321_ignore_List: []
+# V-230322
+rhel8STIG_stigrule_230322_Manage: true
+# V-230323
+rhel8STIG_stigrule_230323_Manage: true
+# V-230325
+rhel8STIG_stigrule_230325_Manage: true
+# V-230326
+rhel8STIG_stigrule_230326_Manage: true
+rhel8STIG_stigrule_230326_ignore_dirs: []
+rhel8STIG_stigrule_230326_new_owner: root
+# V-230327
+rhel8STIG_stigrule_230327_Manage: true
+rhel8STIG_stigrule_230327_ignore_dirs: []
+rhel8STIG_stigrule_230327_new_group: wheel
+# V-230333
+rhel8STIG_stigrule_230333_Manage: true
+rhel8STIG_stigrule_230333_denies: 3
+# V-230335
+rhel8STIG_stigrule_230335_Manage: true
+rhel8STIG_stigrule_230335_interval: 900
+# V-230337
+rhel8STIG_stigrule_230337_Manage: true
+rhel8STIG_stigrule_230337_time: 0
+# V-230339
+rhel8STIG_stigrule_230339_Manage: true
+# V-230341
+rhel8STIG_stigrule_230341_Manage: true
+# V-230343
+rhel8STIG_stigrule_230343_Manage: true
+# V-230345
+rhel8STIG_stigrule_230345_Manage: true
+# V-230364
+rhel8STIG_stigrule_230364_Manage: true
+rhel8STIG_stigrule_230364_exempt_users: []
+# V-230367
+rhel8STIG_stigrule_230367_Manage: true
+rhel8STIG_stigrule_230367_exempt_users: []
+# V-230371
+rhel8STIG_stigrule_230371_Manage: true
+rhel8STIG_stigrule_230371_min_uid: 1000
+rhel8STIG_stigrule_230371_max_uid: 60000
+# V-230372
+rhel8STIG_stigrule_230372_Manage: true
+# V-230381
+rhel8STIG_stigrule_230381_Manage: true
+# V-230383
+# rhel8STIG_stigrule_230383_Manage: true
+# V-230384
+rhel8STIG_stigrule_230384_Manage: true
+# V-230385
+rhel8STIG_stigrule_230385_Manage: true
+# V-230389
+# rhel8STIG_stigrule_230389_Manage: true
+# rhel8STIG_stigrule_230389__postmaster:
+#  - root
+# V-230466
+# rhel8STIG_stigrule_230466_Manage: true
+# V-230468
+rhel8STIG_stigrule_230468_Manage: true
+# V-230469
+rhel8STIG_stigrule_230469_Manage: true
+rhel8STIG_stigrule_230469_limit: 8192
+# V-230470
+rhel8STIG_stigrule_230470_Manage: true
+# V-230475
+rhel8STIG_stigrule_230475_Manage: true
+# V-230479
+rhel8STIG_stigrule_230479_Manage: true
+rhel8STIG_stigrule_230479_syslog_host: syslogHost
+rhel8STIG_stigrule_230479_syslog_port: 514
+rhel8STIG_stigrule_230479_protocol: UDP # UDP or TCP
+# V-230484
+rhel8STIG_stigrule_230484_Manage: true
+rhel8STIG_stigrule_230484_ntp_server: 0.us.pool.ntp.mil
+# V-230491
+rhel8STIG_stigrule_230491_Manage: true
+# V-230494
+rhel8STIG_stigrule_230494_Manage: true
+# V-230495
+rhel8STIG_stigrule_230495_Manage: true
+# V-230496
+rhel8STIG_stigrule_230496_Manage: true
+# V-230497
+rhel8STIG_stigrule_230497_Manage: true
+# V-230498
+rhel8STIG_stigrule_230498_Manage: true
+# V-230499
+rhel8STIG_stigrule_230499_Manage: true
+# V-230502
+# rhel8STIG_stigrule_230502_Manage: true
+# V-230503
+rhel8STIG_stigrule_230503_Manage: true
+# V-230504
+rhel8STIG_stigrule_230504_Manage: true
+rhel8STIG_stigrule_230504_customZone: custom
+rhel8STIG_stigrule_230504_zoneDesc: Ansible generated zone
+rhel8STIG_stigrule_230504_allowed_services:
+  - ssh
+rhel8STIG_stigrule_230504_allowed_ports: []
+rhel8STIG_stigrule_230504_icmp_blocks:
+  - timestamp-reply
+  - timestamp-request
+# V-230505
+# rhel8STIG_stigrule_230505_Manage: true
+# V-230506
+# rhel8STIG_stigrule_230506_Manage: true
+# V-230507
+rhel8STIG_stigrule_230507_Manage: true
+# V-230513
+rhel8STIG_stigrule_230513_Manage: true
+# V-230522
+rhel8STIG_stigrule_230522_Manage: true
+# V-230523
+rhel8STIG_stigrule_230523_Manage: true
+# V-230524
+rhel8STIG_stigrule_230524_Manage: true
+# V-230525
+rhel8STIG_stigrule_230525_Manage: true
+# V-230529
+# rhel8STIG_stigrule_230529_Manage: true
+# V-230531
+rhel8STIG_stigrule_230531_Manage: true
+rhel8STIG_stigrule_244531_ignore_dirs: []
+# V-230532
+rhel8STIG_stigrule_230532_Manage: true
+rhel8STIG_stigrule_244532_ignore_dirs: []
+# V-230534
+rhel8STIG_stigrule_230534_Manage: true
+# V-230546
+# rhel8STIG_stigrule_230546_Manage: true
+# V-230548
+# rhel8STIG_stigrule_230548_Manage: true
+# V-230554
+rhel8STIG_stigrule_230554_Manage: true
+# V-230559
+# rhel8STIG_stigrule_230559_Manage: true
+# V-244521
+rhel8STIG_stigrule_244521_Manage: true
+rhel8STIG_stigrule_244521_unique_name: grub_root
+# V-244522
+rhel8STIG_stigrule_244522_Manage: true
+rhel8STIG_stigrule_244522_unique_name: grub_root
+# V-244523
+# rhel8STIG_stigrule_244523_Manage: true
+# V-244525
+# rhel8STIG_stigrule_244525_Manage: true
+# rhel8STIG_stigrule_244525_ClientAliveInterval: 600
+# V-244530
+# rhel8STIG_stigrule_244530_Manage: true
+# V-244531
+rhel8STIG_stigrule_244531_Manage: true
+# V-244532
+rhel8STIG_stigrule_244532_Manage: true
+# V-244533
+rhel8STIG_stigrule_244533_Manage: true
+# V-244534
+rhel8STIG_stigrule_244534_Manage: true
+# V-244545
+rhel8STIG_stigrule_244545_Manage: true
+# V-244546
+rhel8STIG_stigrule_244546_Manage: true
+# V-244547
+rhel8STIG_stigrule_244547_Manage: true
+# V-244548
+rhel8STIG_stigrule_244548_Manage: true
+# V-250315
+rhel8STIG_stigrule_250315_Manage: true
+# V-250317
+rhel8STIG_stigrule_250317_Manage: true
+# V-251707
+rhel8STIG_stigrule_251707_Manage: true
+# V-251708
+rhel8STIG_stigrule_251708_Manage: true
+rhel8STIG_stigrule_251708_ignore_dirs: []
+# V-251709
+rhel8STIG_stigrule_251709_Manage: true
+rhel8STIG_stigrule_251709_ignore_dirs: []
+rhel8STIG_stigrule_251709_chgrp_acct: root
+# V-251710
+rhel8STIG_stigrule_251710_Manage: true
+# V-251711
+rhel8STIG_stigrule_251711_Manage: true
+# V-251712
+rhel8STIG_stigrule_251712_Manage: true
+# V-251713
+rhel8STIG_stigrule_251713_Manage: true
+# V-251716
+rhel8STIG_stigrule_251716_Manage: true
+# V-254520
+rhel8STIG_stigrule_254520_Manage: true
+rhel8STIG_stigrule_254520_sysadm_u_selinux_users: []
+rhel8STIG_stigrule_254520_staff_u_selinux_users: []
+rhel8STIG_stigrule_254520_user_u_selinux_users: []
+rhel8STIG_stigrule_254520_set_default_user_context: true
+rhel8STIG_stigrule_254520_default_selinux_users:
+  seuser: user_u
+  mcs_range: s0
+# V-255924
+rhel8STIG_stigrule_255924_Manage: true
+# V-256973
+rhel8STIG_stigrule_256973_Manage: true
+# V-257258
+rhel8STIG_stigrule_257258_Manage: true
+# V-257482
+rhel8STIG_stigrule_257482_Manage: true
+# V-257483
+rhel8STIG_stigrule_257483_Manage: true
+# V-268322
+rhel8STIG_stigrule_268322_Manage: true
+# V-272482
+rhel8STIG_stigrule_272482_Manage: true
+# V-272483
+rhel8STIG_stigrule_272483_Manage: true
+# V-272484
+rhel8STIG_stigrule_272484_Manage: true
+rhel8STIG_stigrule_272484_ignore_files: []

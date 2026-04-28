@@ -1,0 +1,44 @@
+- name: grub2_update
+  ansible.builtin.command: grub2-mkconfig -o /boot/grub2/grub.cfg
+  args:
+    creates: /boot/grub2/grub.cfg
+- name: restart_aide
+  ansible.builtin.systemd_service:
+    name: aide
+    state: restarted
+- name: restart_firewalld
+  ansible.builtin.service:
+    name: firewalld
+    state: reloaded
+- name: reboot
+  ansible.builtin.reboot:
+    reboot_timeout: 300
+  when: rhel8STIG_allow_system_reboot
+# - name: restart_auditd
+#  ansible.builtin.service:
+#    name: auditd
+#    state: restarted
+- name: restart_chronyd
+  ansible.builtin.service:
+    name: chronyd
+    state: restarted
+- name: ssh_restart
+  ansible.builtin.service:
+    name: sshd
+    state: restarted
+- name: sssd_restart
+  ansible.builtin.service:
+    name: sssd
+    state: restarted
+- name: NetworkManager_restart
+  ansible.builtin.service:
+    name: NetworkManager
+    state: restarted
+- name: restart_rsyslog
+  ansible.builtin.service:
+    name: rsyslog
+    state: restarted
+- name: restart_usbguard
+  ansible.builtin.service:
+    name: usbguard
+    state: restarted
