@@ -31,3 +31,8 @@ This repository contains an Ansible STIG playbook intended to supplement DISA ST
 - The playbook is intended to supplement DISA content, not replace official DISA STIG documentation or validation procedures.
 - The operator is solely responsible for validating all changes before deployment.
 - By using this repository, users accept full responsibility for reviewing, testing, and safely executing the content.
+
+## Contributors
+
+- Dave King [usmcguy](https://github.com/usmcguy)
+- Glenn Mora Rangel [glennmora ](https://github.com/glennmora)
