@@ -1,4 +1,4 @@
 - hosts: localhost
-  gather_facts: yes
+  gather_facts: true
   roles:
     - rhel8STIG_supp
