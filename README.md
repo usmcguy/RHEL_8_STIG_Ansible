@@ -1,6 +1,6 @@
-# Ansible STIG Playbook
+# Ansible RHEL 8 Supplemental STIG Playbook
 
-This repository contains an Ansible STIG playbook intended to supplement DISA STIG content and help automate system hardening tasks.
+This repository contains an Ansible RHEL 8 Supplemental STIG Playbook intended to supplement DISA STIG content and help automate system hardening tasks.
 
 > [!WARNING]
 > This playbook can make significant system changes and may have unintended consequences if applied without review or testing.
@@ -24,6 +24,7 @@ This repository contains an Ansible STIG playbook intended to supplement DISA ST
 - Test in a non-production environment first.
 - Create a verified backup or snapshot of the target system before use.
 - Confirm the settings match your platform, mission, and local security requirements.
+- Check out the latest compliance automation tools from DISA at [www.cyber.mil](https://www.cyber.mil)
 
 ## Disclaimer
 
@@ -35,4 +36,4 @@ This repository contains an Ansible STIG playbook intended to supplement DISA ST
 ## Contributors
 
 - Dave King [usmcguy](https://github.com/usmcguy)
-- Glenn Mora Rangel [glennmora ](https://github.com/glennmora)
+- Glenn Mora Rangel [glennmora](https://github.com/glennmora)
