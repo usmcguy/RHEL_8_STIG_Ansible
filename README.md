@@ -35,5 +35,7 @@ This repository contains an Ansible RHEL 8 Supplemental STIG Playbook intended t
 
 ## Contributors
 
-- Dave King [usmcguy](https://github.com/usmcguy)
-- Glenn Mora Rangel [glennmora](https://github.com/glennmora)
+- Dave King [usmcguy](https://github.com/usmcguy) <br>
+  [![usmcguy](https://avatars.githubusercontent.com/u/761929?v=4&s=48)](https://github.com/usmcguy)
+- Glenn Mora Rangel [glennmora](https://github.com/glennmora) <br>
+  [![glennmora](https://avatars.githubusercontent.com/u/108555140?v=4&s=48)](https://github.com/glennmora)
