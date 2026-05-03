@@ -109,10 +109,15 @@
     msg: "{{ system_group_list | map(attribute='key') | list | join(', ') }}"
 
 # V-230222 RHEL-08-010010
-- name: Remove old repo file
-  ansible.builtin.file:
-    path: /etc/yum.repos.d/ansible.repo
-    state: absent
+# https://access.redhat.com/security/team/key
+- name: Copy RPM signing key
+  ansible.builtin.copy:
+    src: files/RPM-GPG-KEY-redhat-release
+    dest: /etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
+    owner: root
+    group: root
+    mode: '0644'
+  when: rhel8STIG_stigrule_256973_Manage
 
 - name: STIGrule_230222__dnf_repoinfo
   ansible.builtin.command:
@@ -4789,15 +4794,6 @@
 #  notify: ssh_restart
 
 # V-256973
-- name: STIGrule_256973__copy_GPG_key_file
-  ansible.builtin.copy:
-    src: files/RPM-GPG-KEY-redhat-release
-    dest: /etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
-    owner: root
-    group: root
-    mode: '644'
-  when: rhel8STIG_stigrule_256973_Manage
-
 - name: STIGrule_256973__import_GPG_key
   ansible.builtin.rpm_key:
     state: present
