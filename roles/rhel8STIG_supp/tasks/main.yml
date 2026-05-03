@@ -1168,7 +1168,7 @@
     - grub_poison_check.rc == 0
   notify: grub2_update
 
-- name: STIGrule_230277__geubby_set_page_poison
+- name: STIGrule_230277__grubby_set_page_poison
   ansible.builtin.command: "grubby --update-kernel=ALL --args='page_poison=1'"
   register: page_poison_result
   changed_when: page_poison_result.rc == 0
