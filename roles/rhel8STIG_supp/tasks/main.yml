@@ -3767,17 +3767,6 @@
 #  when: rhel8STIG_stigrule_230559_Manage
 
 # V-244521
-- name: Check if UEFI or BIOS
-  ansible.builtin.stat:
-    path: /sys/firmware/efi
-    get_checksum: false
-    get_mime: false
-  register: efi_dir
-
-- name: Set boot_mode fact
-  ansible.builtin.set_fact:
-    boot_mode: "{{ 'UEFI' if efi_dir.stat.exists else 'BIOS' }}"
-
 - name: STIGrule_244521__grub2-tools_present
   ansible.builtin.package:
     name: grub2-tools
