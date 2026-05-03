@@ -128,8 +128,8 @@
 
 - name: STIGrule_230222__add_repository_rhel8_baseos
   ansible.builtin.yum_repository:
-    name: rhel8-baseos
-    description: RHEL8 BaseOS (RPMs)
+    name: rhel-8-for-x86_64-baseos-rpms
+    description: Red Hat Enterprise Linux 8 for x86_64 - BaseOS (RPMs)
     file: "{{ rhel8STIG_stigrule_230222_repo_file }}"
     baseurl: "{{ rhel8STIG_stigrule_230222__baseos_Baseurl }}"
     gpgcheck: true
@@ -143,8 +143,8 @@
 
 - name: STIGrule_230222__add_repository_rhel8_appstream
   ansible.builtin.yum_repository:
-    name: rhel8-appstream
-    description: RHEL8 AppStream (RPMs)
+    name: rhel-8-for-x86_64-appstream-rpms
+    description: Red Hat Enterprise Linux 8 for x86_64 - AppStream (RPMs)
     file: "{{ rhel8STIG_stigrule_230222_repo_file }}"
     baseurl: "{{ rhel8STIG_stigrule_230222__appstream_Baseurl }}"
     gpgcheck: true
