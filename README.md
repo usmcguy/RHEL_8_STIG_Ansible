@@ -28,8 +28,11 @@ This repository contains an Ansible RHEL 8 Supplemental STIG Playbook intended t
 
 ## Disclaimer
 
+- This project is not affiliated with, endorsed by, or sponsored by the Defense Information Systems Agency (DISA), the Department of Defense (DoD), or any U.S. government entity.
+- Official STIG guidance, validation, and compliance determinations must be obtained through authorized DISA resources, [www.cyber.mil](https://www.cyber.mil).
 - This project is provided for educational and operational use as-is, without warranty.
 - The playbook is intended to supplement DISA content, not replace official DISA STIG documentation or validation procedures.
+- All content in this repository is independently developed and maintained.
 - The operator is solely responsible for validating all changes before deployment.
 - By using this repository, users accept full responsibility for reviewing, testing, and safely executing the content.
 
