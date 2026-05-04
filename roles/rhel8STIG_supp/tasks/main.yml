@@ -907,6 +907,7 @@
     path: "{{ item }}"
     get_checksum: false
     get_mime: false
+    follow: true
   loop:
     - /etc/yum.conf
     - /etc/dnf/dnf.conf
