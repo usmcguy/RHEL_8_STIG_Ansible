@@ -2048,3 +2048,22 @@
   when:
     - rhel9stig_stigrule_257937_Manage
     - firewalld_default_zone != rhel9stig_stigrule_257937_zone
+
+# R-257941 RHEL-09-251040
+- name: Find interfaces in promiscuous mode
+  ansible.builtin.shell:
+    cmd: |
+      set -o pipefail
+      ip -o link | awk '/PROMISC/ {gsub(/:$/, "", $2); print $2}' || true
+  register: promisc_interfaces
+  changed_when: false
+  when: rhel9stig_stigrule_257941_Manage
+
+- name: stigrule_257941__disable_promiscuous_mode
+  ansible.builtin.command: "ip link set dev {{ item }} multicast off promisc off"
+  loop: "{{ promisc_interfaces.stdout_lines | default([]) | difference(rhel9stig_stigrule_257941_ignore_interfaces) }}"
+  register: disable_promisc
+  changed_when: disable_promisc.rc == 0
+  when:
+    - rhel9stig_stigrule_257941_Manage
+    - promisc_interfaces.stdout_lines | default([]) | length > 0
