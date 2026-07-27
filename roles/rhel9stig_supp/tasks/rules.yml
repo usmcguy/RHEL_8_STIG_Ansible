@@ -1538,7 +1538,7 @@
 - name: stigrule_257919__chgrp_binary_files
   ansible.builtin.shell: |
     set -o pipefail
-    find -L {{ rhel9stig_stigrule_257919_bin_paths | join(' ') }} {{ exclude_chgrp_binary_cmd }} {{ filter_sys_grps }}-type f -exec ls -al {} + -exec chgrp {{ rhel9stig_stigrule_257919_chgrp_acct }} {} + || true
+    find -L {{ rhel9stig_stigrule_257919_bin_paths | join(' ') }} {{ exclude_chgrp_binary_cmd }} -gid +{{ sys_gid_max }} -type f -exec ls -al {} + -exec chgrp {{ rhel9stig_stigrule_257919_chgrp_acct }} {} + || true
   register: chgrp_binary_cmds
   changed_when: chgrp_binary_cmds.stdout | length > 0
   when: rhel9stig_stigrule_257919_Manage
@@ -1604,7 +1604,7 @@
 - name: stigrule_257921__chgrp_library_files
   ansible.builtin.shell: |
     set -o pipefail
-    find {{ rhel9stig_stigrule_257921_bin_paths | join(' ') }} {{ exclude_chgrp_library_cmd }} {{ filter_sys_grps }} -type f -name '*.so*' -exec ls -al {} + -exec chgrp {{ rhel9stig_stigrule_257921_chgrp_acct }} {} + || true
+    find {{ rhel9stig_stigrule_257921_bin_paths | join(' ') }} {{ exclude_chgrp_library_cmd }} -gid +{{ sys_gid_max }} -type f -name '*.so*' -exec ls -al {} + -exec chgrp {{ rhel9stig_stigrule_257921_chgrp_acct }} {} + || true
   register: chgrp_library_cmds
   changed_when: chgrp_library_cmds.stdout | length > 0
   when: rhel9stig_stigrule_257921_Manage
@@ -1641,3 +1641,410 @@
   register: chown_dir_library_cmds
   changed_when: chown_dir_library_cmds.stdout | length > 0
   when: rhel9stig_stigrule_257922_Manage
+
+# R-257923 RHEL-09-232215
+- name: Define excluded library dir paths
+  ansible.builtin.set_fact:
+    exclude_library_paths_chgrp_dir: >-
+      {{ rhel9stig_stigrule_257923_ignore_paths
+        | map('regex_replace', '^(.*)$', "-path '\1'")
+        | join(' -o ')
+      }}
+  when: rhel9stig_stigrule_257923_Manage
+
+- name: Add prune argument for excluded library dir paths
+  ansible.builtin.set_fact:
+    exclude_chgrp_dir_library_cmd: '\( {{ exclude_library_paths_chgrp_dir }} \) -prune -o'
+  when:
+    - rhel9stig_stigrule_257923_Manage
+    - exclude_library_paths_chgrp_dir is defined
+    - exclude_library_paths_chgrp_dir | length > 0
+
+- name: Set empty var when no library dir paths excluded
+  ansible.builtin.set_fact:
+    exclude_chgrp_dir_library_cmd: ''
+  when:
+    - rhel9stig_stigrule_257923_Manage
+    - exclude_library_paths_chgrp_dir is not defined or exclude_library_paths_chgrp_dir | length == 0
+
+
+- name: stigrule_257923__chgrp_library_dirs
+  ansible.builtin.shell: |
+    set -o pipefail
+    find {{ rhel9stig_stigrule_257923_library_paths | join(' ') }} {{ exclude_chgrp_dir_library_cmd }} -gid +{{ sys_gid_max }} -type d ! -xtype l -exec ls -ald {} + -exec chgrp {{ rhel9stig_stigrule_257923_chgrp_acct }} {} + || true
+  register: chgrp_dir_library_cmds
+  changed_when: chgrp_dir_library_cmds.stdout | length > 0
+  when: rhel9stig_stigrule_257923_Manage
+
+# R-257924 RHEL-09-232220
+- name: stigrule_257924__chown_audit_tools
+  ansible.builtin.file:
+    path: "{{ item }}"
+    owner: root
+  loop: "{{ rhel9stig_stigrule_audit_tool_bins }}"
+  when: rhel9stig_stigrule_257924_Manage
+
+# R-257925 RHEL-09-232225
+- name: stigrule_257925__chgrp_audit_tools
+  ansible.builtin.file:
+    path: "{{ item }}"
+    group: root
+  loop: "{{ rhel9stig_stigrule_audit_tool_bins }}"
+  when: rhel9stig_stigrule_257925_Manage
+
+# R-257926 RHEL-09-232230
+- name: stigrule_257926__chown_cron_config
+  ansible.builtin.shell: |
+    set -o pipefail
+    find {{ rhel9stig_stigrule_257926_cron_paths | join(' ') }} ! -user root -exec ls -ald {} + -exec chown root {} + || true
+  register: chown_cron_config
+  changed_when: chown_cron_config.stdout | length > 0
+  when: rhel9stig_stigrule_257926_Manage
+
+# R-257927 RHEL-09-232235
+- name: stigrule_257927__chgrp_cron_config
+  ansible.builtin.shell: |
+    set -o pipefail
+    find {{ rhel9stig_stigrule_257927_cron_paths | join(' ') }} ! -group root -exec ls -ald {} + -exec chgrp root {} + || true
+  register: chgrp_cron_config
+  changed_when: chgrp_cron_config.stdout | length > 0
+  when: rhel9stig_stigrule_257927_Manage
+
+# R-257928 RHEL-09-232240
+- name: Define excluded world writable dir paths
+  ansible.builtin.set_fact:
+    exclude_ww_paths_chown: >-
+      {{ rhel9stig_stigrule_257928_ignore_paths
+        | map('regex_replace', '^(.*)$', "-path '\1'")
+        | join(' -o ')
+      }}
+  when: rhel9stig_stigrule_257928_Manage
+
+- name: Add prune argument for excluded world writable dir paths
+  ansible.builtin.set_fact:
+    exclude_chown_ww_cmd: '\( {{ exclude_ww_paths_chown }} \) -prune -o'
+  when:
+    - rhel9stig_stigrule_257928_Manage
+    - exclude_ww_paths_chown is defined
+    - exclude_ww_paths_chown | length > 0
+
+- name: Set empty var when no world writable dir paths excluded
+  ansible.builtin.set_fact:
+    exclude_chown_ww_cmd: ''
+  when:
+    - rhel9stig_stigrule_257928_Manage
+    - exclude_ww_paths_chown is not defined or exclude_ww_paths_chown | length == 0
+
+- name: stigrule_257928__chown_world_writable_dirs
+  ansible.builtin.shell: |
+    set -o pipefail
+    find {{ item }} -xdev {{ exclude_chown_ww_cmd }} -type d -perm -0002 -uid +{{ sys_uid_max }} -exec ls -ald {} + -exec chown {{ rhel9stig_stigrule_257928_new_owner }} {} + || true
+  loop: "{{ ansible_facts.mounts | selectattr('fstype', 'in', rhel9stig_stigrule_local_fstypes) | map(attribute='mount') | list }}"
+  register: chown_ww_dirs
+  changed_when: chown_ww_dirs.stdout | length > 0
+  when: rhel9stig_stigrule_257928_Manage
+
+# R-257929 RHEL-09-232245
+- name: Define excluded sticky bit dir paths
+  ansible.builtin.set_fact:
+    exclude_ww_paths_chmod: >-
+      {{ rhel9stig_stigrule_257929_ignore_paths
+        | map('regex_replace', '^(.*)$', "-path '\1'")
+        | join(' -o ')
+      }}
+  when: rhel9stig_stigrule_257929_Manage
+
+- name: Add prune argument for excluded sticky bit dir paths
+  ansible.builtin.set_fact:
+    exclude_chmod_ww_cmd: '\( {{ exclude_ww_paths_chmod }} \) -prune -o'
+  when:
+    - rhel9stig_stigrule_257929_Manage
+    - exclude_ww_paths_chmod is defined
+    - exclude_ww_paths_chmod | length > 0
+
+- name: Set empty var when no sticky bit dir paths excluded
+  ansible.builtin.set_fact:
+    exclude_chmod_ww_cmd: ''
+  when:
+    - rhel9stig_stigrule_257929_Manage
+    - exclude_ww_paths_chmod is not defined or exclude_ww_paths_chmod | length == 0
+
+- name: stigrule_257929__set_sticky_bit_on_world_writable_dirs
+  ansible.builtin.shell: |
+    set -o pipefail
+    find / {{ exclude_chmod_ww_cmd }} -type d \( -perm -0002 -a ! -perm -1000 \) -exec ls -ald {} + -exec chmod a+t {} + || true
+  register: chmod_ww_dirs
+  changed_when: chmod_ww_dirs.stdout | length > 0
+  when: rhel9stig_stigrule_257929_Manage
+
+# R-257930 RHEL-09-232250
+- name: Define excluded nogroup paths
+  ansible.builtin.set_fact:
+    exclude_nogroup_paths: >-
+      {{ rhel9stig_stigrule_257930_ignore_paths
+        | map('regex_replace', '^(.*)$', "-path '\1'")
+        | join(' -o ')
+      }}
+  when: rhel9stig_stigrule_257930_Manage
+
+- name: Add prune argument for excluded nogroup paths
+  ansible.builtin.set_fact:
+    exclude_ng_cmd: '\( {{ exclude_nogroup_paths }} \) -prune -o'
+  when:
+    - rhel9stig_stigrule_257930_Manage
+    - exclude_nogroup_paths is defined
+    - exclude_nogroup_paths | length > 0
+
+- name: Set empty var when no nogroup paths excluded
+  ansible.builtin.set_fact:
+    exclude_ng_cmd: ''
+  when:
+    - rhel9stig_stigrule_257930_Manage
+    - exclude_nogroup_paths is not defined or exclude_nogroup_paths | length == 0
+
+- name: stigrule_257930__chgrp_files_without_valid_group
+  ansible.builtin.shell: |
+    set -o pipefail
+    find {{ item }} -xdev {{ exclude_ng_cmd }} -nogroup -exec ls -ald {} + -exec chgrp {{ rhel9stig_stigrule_257930_new_group }} {} + || true
+  loop: "{{ ansible_facts.mounts | selectattr('fstype', 'in', rhel9stig_stigrule_local_fstypes) | map(attribute='mount') | list }}"
+  register: chgrp_nogroup_files
+  changed_when: chgrp_nogroup_files.stdout | length > 0
+  when: rhel9stig_stigrule_257930_Manage
+
+# R-257931 RHEL-09-232255
+- name: Define excluded nouser paths
+  ansible.builtin.set_fact:
+    exclude_nouser_paths: >-
+      {{ rhel9stig_stigrule_257931_ignore_paths
+        | map('regex_replace', '^(.*)$', "-path '\1'")
+        | join(' -o ')
+      }}
+  when: rhel9stig_stigrule_257931_Manage
+
+- name: Add prune argument for excluded nouser paths
+  ansible.builtin.set_fact:
+    exclude_no_cmd: '\( {{ exclude_nouser_paths }} \) -prune -o'
+  when:
+    - rhel9stig_stigrule_257931_Manage
+    - exclude_nouser_paths is defined
+    - exclude_nouser_paths | length > 0
+
+- name: Set empty var when no nouser paths excluded
+  ansible.builtin.set_fact:
+    exclude_no_cmd: ''
+  when:
+    - rhel9stig_stigrule_257931_Manage
+    - exclude_nouser_paths is not defined or exclude_nouser_paths | length == 0
+
+- name: stigrule_257931__chown_files_without_valid_owner
+  ansible.builtin.shell: |
+    set -o pipefail
+    find {{ item }} -xdev {{ exclude_no_cmd }} -nouser -exec ls -ald {} + -exec chown {{ rhel9stig_stigrule_257931_new_owner }} {} + || true
+  loop: "{{ ansible_facts.mounts | selectattr('fstype', 'in', rhel9stig_stigrule_local_fstypes) | map(attribute='mount') | list }}"
+  register: chown_nouser_files
+  changed_when: chown_nouser_files.stdout | length > 0
+  when: rhel9stig_stigrule_257931_Manage
+
+# R-257932 RHEL-09-232260
+- name: Get SELinux status
+  ansible.builtin.command: getenforce
+  register: selinux_state
+  changed_when: false
+  failed_when: false
+  when: rhel9stig_stigrule_257932_Manage
+
+- name: Find incorrectly labeled device files
+  ansible.builtin.shell:
+    cmd: |
+      set -o pipefail
+      find /dev \
+        \( -context '*:device_t:*' -o -context '*:unlabeled_t:*' \) \
+        \( -type c -o -type b \) -printf '%p\n' 2>/dev/null || true
+  register: mislabeled_devices
+  changed_when: false
+  when:
+    - rhel9stig_stigrule_257932_Manage
+    - selinux_state.stdout | default('Disabled') != 'Disabled'
+
+- name: stigrule_257932__restorecon_mislabeled_devices
+  ansible.builtin.command: "restorecon -v {{ item }}"
+  loop: "{{ mislabeled_devices.stdout_lines | default([]) | difference(rhel9stig_stigrule_257932_ignore_devices) }}"
+  register: restorecon_devices
+  changed_when: "'Relabeled' in restorecon_devices.stdout"
+  when:
+    - rhel9stig_stigrule_257932_Manage
+    - mislabeled_devices.stdout_lines | default([]) | length > 0
+
+- name: Recheck device labels after restorecon
+  ansible.builtin.shell:
+    cmd: |
+      set -o pipefail
+      find {{ rhel9stig_stigrule_257932_device_paths | join(' ') }} \
+        \( -context '*:device_t:*' -o -context '*:unlabeled_t:*' \) \
+        \( -type c -o -type b \) -printf '%p\n' 2>/dev/null || true
+  register: mislabeled_devices_recheck
+  changed_when: false
+  when:
+    - rhel9stig_stigrule_257932_Manage
+    - restorecon_devices is changed
+
+- name: stigrule_257932__report_devices_still_mislabeled
+  ansible.builtin.debug:
+    msg: >-
+      Device files remain labeled device_t or unlabeled_t and require a more specific
+      SELinux policy or a reinstall of the package providing the device class:
+      {{ mislabeled_devices_recheck.stdout_lines | difference(rhel9stig_stigrule_257932_ignore_devices) | join(', ') }}
+  when:
+    - rhel9stig_stigrule_257932_Manage
+    - mislabeled_devices_recheck.stdout_lines | default([]) | difference(rhel9stig_stigrule_257932_ignore_devices) | length > 0
+
+# R-257937 RHEL-09-251020
+- name: stigrule_257937__ensure_firewalld_present
+  ansible.builtin.dnf:
+    name: firewalld
+    state: present
+  when: rhel9stig_stigrule_257937_Manage
+
+- name: stigrule_257937__ensure_python-firewall_present
+  ansible.builtin.dnf:
+    name: python3-firewall
+    state: present
+  when: rhel9stig_stigrule_257937_Manage
+
+- name: stigrule_257937__ensure_firewalld_running
+  ansible.builtin.service:
+    name: firewalld
+    state: started
+  when: rhel9stig_stigrule_257937_Manage
+
+- name: Get current default zone
+  ansible.builtin.command: firewall-cmd --get-default-zone
+  register: firewalld_default_zone
+  changed_when: false
+  when:
+    - rhel9stig_stigrule_257937_Manage
+
+- name: Get active firewall zones
+  ansible.posix.firewalld_info:
+    active_zones: true
+  register: active_zones
+  when:
+    - rhel9stig_stigrule_257937_Manage
+
+- name: Define default firewall zone
+  ansible.builtin.set_fact:
+    firewalld_default_zone: "{{ active_zones.firewalld_info.default_zone }}"
+  when:
+    - rhel9stig_stigrule_257937_Manage
+
+- name: Get detailed default zone info
+  ansible.posix.firewalld_info:
+    zones: "{{ default_zone }}"
+  register: zone_details
+  when:
+    - rhel9stig_stigrule_257937_Manage
+
+- name: Get built-in zone names
+  ansible.bulitin.shell:
+    cmd: |
+      find /usr/lib/firewalld/zones -maxdepth 1 -type f -name '*.xml' -printf '%f\n' | sed 's/\.xml$/'
+  register: builtin_zones
+  when:
+    - rhel9stig_stigrule_257937_Manage
+
+- name: stigrule_257937__create_firewall_zone
+  ansible.posix.firewalld:
+    zone: "{{ rhel9stig_stigrule_257937_zone }}"
+    state: present
+    permanent: true
+  register: create_firewall_zone
+  when:
+    - rhel9stig_stigrule_257937_Manage
+    - rhel9stig_stigrule_257937_zone not in builtin_zones
+
+- name: stigrule_257937__set_zone_shortname
+  ansible.builtin.lineinfile:
+    path: /etc/firewalld/zones/{{ rhel9stig_stigrule_257937_zone }}.xml
+    regexp: '^(\s*)<short>.*</short>'
+    line: "  <short>{{ rhel9stig_stigrule_257937_zone }}</short>"
+    insertafter: '<zone'
+    state: present
+  register: firewall_zone_shortname
+  when:
+    - rhel9stig_stigrule_257937_Manage
+    - rhel9stig_stigrule_257937_zone not in builtin_zones
+
+- name: stigrule_257937__set_zone_description
+  ansible.builtin.lineinfile:
+    path: /etc/firewalld/zones/{{ rhel9stig_stigrule_257937_zone }}.xml
+    regexp: '^(\s*)<description>.*</description>'
+    line: "  <description>{{ rhel9stig_stigrule_257937_zoneDesc }}</description>"
+    insertafter: '<short>'
+    state: present
+  register: firewall_zone_desc
+  when:
+    - rhel9stig_stigrule_257937_Manage
+    - rhel9stig_stigrule_257937_zone not in builtin_zones
+
+- name: Reload firewall rules
+  ansible.builtin.command:
+    cmd: firewall-cmd --reload
+  changed_when: false
+  when:
+    - rhel9stig_stigrule_257937_Manage
+    - firewall_zone_shortname.changed or firewall_zone_desc.changed
+
+- name: stigrule_257937__set_zone_drop_target
+  ansible.posix.firewalld:
+    zone: "{{ rhel9stig_stigrule_257937_zone }}"
+    state: present
+    permanent: true
+    target: DROP
+  when:
+    - rhel9stig_stigrule_257937_Manage
+
+- name: stigrule_257937__set_allowed_services
+  ansible.posix.firewalld:
+    zone: "{{ rhel9stig_stigrule_257937_zone }}"
+    service: "{{ item }}"
+    state: enabled
+    permanent: true
+  loop: "{{ rhel9stig_stigrule_257937_allowed_services }}"
+  when:
+    - rhel9stig_stigrule_257937_Manage
+
+- name: stigrule_257937__set_allowed_ports
+  ansible.posix.firewalld:
+    zone: "{{ rhel9stig_stigrule_257937_zone }}"
+    port: "{{ item }}"
+    state: enabled
+    permanent: true
+  loop: "{{ rhel9stig_stigrule_257937_allowed_ports }}"
+  when:
+    - rhel9stig_stigrule_257937_Manage
+
+- name: stigrule_257937__assign_interfaces_to_firewall_zone
+  ansible.posix.firewalld:
+    zone: "{{ rhel9stig_stigrule_257937_zone }}"
+    interface: "{{ item }}"
+    state: enabled
+    permanent: true
+  loop: "{{ ansible_interfaces | difference(['lo']) }}"
+  when:
+    - rhel9stig_stigrule_257937_Manage
+
+- name: Reload firewall rules
+  ansible.builtin.command:
+    cmd: firewall-cmd --reload
+  changed_when: false
+  when:
+    - rhel9stig_stigrule_257937_Manage
+    - create_firewall_zone.changed
+
+- name: stigrule_257937__set_firewall_zone_as_default
+  ansible.builtin.command: firewall-cmd --set-default-zone={{ rhel9stig_stigrule_257937_zone }}
+  register: set_default_zone
+  changed_when: '"ZONE_ALREADY_SET" not in set_default_zone.stderr'
+  when:
+    - rhel9stig_stigrule_257937_Manage
+    - firewalld_default_zone != rhel9stig_stigrule_257937_zone
