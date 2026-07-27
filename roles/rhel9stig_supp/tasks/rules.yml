@@ -1538,7 +1538,7 @@
 - name: stigrule_257919__chgrp_binary_files
   ansible.builtin.shell: |
     set -o pipefail
-    find -L {{ rhel9stig_stigrule_257919_bin_paths | join(' ') }} {{ exclude_chgrp_binary_cmd }} -type f ! -group root -exec ls -al {} + -exec chgrp root {} + || true
+    find -L {{ rhel9stig_stigrule_257919_bin_paths | join(' ') }} {{ exclude_chgrp_binary_cmd }} {{ filter_sys_grps }}-type f -exec ls -al {} + -exec chgrp {{ rhel9stig_stigrule_257919_chgrp_acct }} {} + || true
   register: chgrp_binary_cmds
   changed_when: chgrp_binary_cmds.stdout | length > 0
   when: rhel9stig_stigrule_257919_Manage
@@ -1604,7 +1604,7 @@
 - name: stigrule_257921__chgrp_library_files
   ansible.builtin.shell: |
     set -o pipefail
-    find {{ rhel9stig_stigrule_257921_bin_paths | join(' ') }} {{ exclude_chgrp_library_cmd }} -type f -name '*.so*' ! -group root -exec ls -al {} + -exec chgrp root {} + || true
+    find {{ rhel9stig_stigrule_257921_bin_paths | join(' ') }} {{ exclude_chgrp_library_cmd }} {{ filter_sys_grps }} -type f -name '*.so*' -exec ls -al {} + -exec chgrp {{ rhel9stig_stigrule_257921_chgrp_acct }} {} + || true
   register: chgrp_library_cmds
   changed_when: chgrp_library_cmds.stdout | length > 0
   when: rhel9stig_stigrule_257921_Manage
