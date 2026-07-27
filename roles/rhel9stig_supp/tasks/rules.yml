@@ -98,6 +98,15 @@
   ansible.builtin.debug:
     msg: "{{ system_group_list | map(attribute='key') | list | join(', ') }}"
 
+- name: Create find filter for filtering system accounts
+  ansible.builtin.set_fact:
+    filter_sys_grps: >-
+      \( {{ (system_group_list | map(attribute='key') | list)
+        | unique
+        | map('regex_replace', '^(.*)$', "! -group '\1'")
+        | join(' -a ')
+      }} \)
+
 - name: Deploy updated authselect profile templates
   ansible.builtin.template:
     src: "sssd/{{ item }}.j2"
