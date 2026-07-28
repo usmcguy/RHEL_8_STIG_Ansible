@@ -2067,3 +2067,183 @@
   when:
     - rhel9stig_stigrule_257941_Manage
     - promisc_interfaces.stdout_lines | default([]) | length > 0
+
+# R-257945 RHEL-09-252020
+- name: Ensure chrony is installed
+  ansible.builtin.package:
+    name: chrony
+    state: present
+  when: rhel9stig_stigrule_257945_Manage
+
+- name: stigrule_257945__add_ntp_server
+  ansible.builtin.lineinfile:
+    path: /etc/chrony.conf
+    regexp: '^\s*(server|pool)\s+{{ item | regex_escape }}(\s|$)'
+    line: "server {{ item }} iburst maxpoll {{ rhel9stig_stigrule_257945_maxpoll }}"
+    owner: root
+    group: root
+    mode: '0644'
+  loop: "{{ rhel9stig_stigrule_257945_ntp_servers }}"
+  notify: restart_chronyd
+  when:
+    - rhel9stig_stigrule_257945_Manage
+
+- name: stigrule_257945__add_maxpoll_to_existing_sources
+  ansible.builtin.replace:
+    path: /etc/chrony.conf
+    regexp: '^(\s*(?:server|pool)\s+(?!{{ rhel9stig_stigrule_257945_ntp_servers | map("regex_escape") | join("|") }})\S+(?:(?!maxpoll)[^\n])*)$'
+    replace: '\1 maxpoll {{ rhel9stig_stigrule_257945_maxpoll }}'
+  notify: restart_chronyd
+  when:
+    - rhel9stig_stigrule_257945_Manage
+    - rhel9stig_stigrule_257945_ntp_servers | length > 0
+
+# R-257948 RHEL-09-252035
+- name: Get configured NetworkManager DNS mode
+  ansible.builtin.shell:
+    cmd: |
+      set -o pipefail
+      awk -F= '/^\s*dns\s*=/ {gsub(/[[:space:]]/, "", $2); print $2}' \
+        /etc/NetworkManager/NetworkManager.conf 2>/dev/null || true
+  register: nm_dns_mode
+  changed_when: false
+  when:
+    - rhel9stig_stigrule_257948_Manage
+    - not rhel9stig_stigrule_257948_not_applicable
+
+- name: Count current name servers
+  ansible.builtin.shell:
+    cmd: |
+      set -o pipefail
+      grep -c '^\s*nameserver\s' /etc/resolv.conf || true
+  register: resolv_nameserver_count
+  changed_when: false
+  when:
+    - rhel9stig_stigrule_257948_Manage
+    - not rhel9stig_stigrule_257948_not_applicable
+
+# With dns=none NetworkManager leaves /etc/resolv.conf alone, so it is managed
+# directly. Any other mode means NetworkManager owns the file and edits there
+# would be overwritten, so the connection profile is updated instead.
+- name: stigrule_257948__add_nameservers_to_resolv_conf
+  ansible.builtin.lineinfile:
+    path: /etc/resolv.conf
+    line: "nameserver {{ item }}"
+    regexp: '^\s*nameserver\s+{{ item | regex_escape }}\s*$'
+    owner: root
+    group: root
+    mode: '0644'
+    create: true
+  loop: "{{ rhel9stig_stigrule_257948_nameservers }}"
+  when:
+    - rhel9stig_stigrule_257948_Manage
+    - not rhel9stig_stigrule_257948_not_applicable
+    - nm_dns_mode.stdout | default('') == 'none'
+    - resolv_nameserver_count.stdout | default('0') | int < 2
+    - rhel9stig_stigrule_257948_nameservers | length >= 2
+
+- name: Get active NetworkManager connection
+  ansible.builtin.shell:
+    cmd: |
+      set -o pipefail
+      nmcli -t -f NAME connection show --active | head -1 || true
+  register: nm_active_connection
+  changed_when: false
+  when:
+    - rhel9stig_stigrule_257948_Manage
+    - not rhel9stig_stigrule_257948_not_applicable
+    - nm_dns_mode.stdout | default('') != 'none'
+    - resolv_nameserver_count.stdout | default('0') | int < 2
+
+- name: stigrule_257948__set_nameservers_on_nm_connection
+  ansible.builtin.command: >-
+    nmcli connection modify
+    '{{ rhel9stig_stigrule_257948_connection | default(nm_active_connection.stdout, true) }}'
+    {{ rhel9stig_stigrule_257948_ip_family }}.dns
+    '{{ rhel9stig_stigrule_257948_nameservers | join(",") }}'
+  register: nm_dns_set
+  changed_when: nm_dns_set.rc == 0
+  notify: NetworkManager_restart
+  when:
+    - rhel9stig_stigrule_257948_Manage
+    - not rhel9stig_stigrule_257948_not_applicable
+    - nm_dns_mode.stdout | default('') != 'none'
+    - resolv_nameserver_count.stdout | default('0') | int < 2
+    - rhel9stig_stigrule_257948_nameservers | length >= 2
+    - (rhel9stig_stigrule_257948_connection | default(nm_active_connection.stdout, true)) | length > 0
+
+- name: stigrule_257948__report_insufficient_nameservers
+  ansible.builtin.debug:
+    msg: >-
+      Fewer than two name servers are configured and
+      rhel9stig_stigrule_257948_nameservers does not supply at least two.
+      RHEL-09-252035 cannot be remediated without site specific resolvers.
+  when:
+    - rhel9stig_stigrule_257948_Manage
+    - not rhel9stig_stigrule_257948_not_applicable
+    - resolv_nameserver_count.stdout | default('0') | int < 2
+    - rhel9stig_stigrule_257948_nameservers | length < 2
+
+# R-257950 RHEL-09-252045
+- name: Populate service facts
+  ansible.builtin.service_facts:
+  when: rhel9stig_stigrule_257950_Manage
+
+- name: Set ipsec service state fact
+  ansible.builtin.set_fact:
+    ipsec_active: "{{ ansible_facts.services['ipsec.service'].state | default('inactive') }}"
+  when: rhel9stig_stigrule_257950_Manage
+
+- name: Find configured IPsec connections
+  ansible.builtin.shell:
+    cmd: |
+      set -o pipefail
+      grep -rniE '^\s*conn\s' /etc/ipsec.conf /etc/ipsec.d/ 2>/dev/null || true
+  register: ipsec_connections
+  changed_when: false
+  when:
+    - rhel9stig_stigrule_257950_Manage
+    - ipsec_active | default('inactive') == 'running'
+
+- name: stigrule_257950__report_undocumented_ip_tunnels
+  ansible.builtin.debug:
+    msg: >-
+      The ipsec service is active with IPsec connections configured that are not
+      listed in rhel9stig_stigrule_257950_approved_tunnels. Each tunnel must be
+      documented with the ISSO or removed:
+      {{ ipsec_connections.stdout_lines | join(' | ') }}
+  when:
+    - rhel9stig_stigrule_257950_Manage
+    - ipsec_connections.stdout_lines | default([]) | length > 0
+    - ipsec_connections.stdout_lines | reject('search', rhel9stig_stigrule_257950_approved_tunnels | map('regex_escape') | join('|')) | list | length > 0
+
+- name: stigrule_257950__disable_unused_ipsec_service
+  ansible.builtin.systemd_service:
+    name: ipsec
+    state: stopped
+    enabled: false
+  when:
+    - rhel9stig_stigrule_257950_Manage
+    - rhel9stig_stigrule_257950_disable_unused_ipsec
+    - ipsec_active | default('inactive') == 'running'
+    - ipsec_connections.stdout_lines | default([]) | length == 0
+
+# R-257951 RHEL-09-252050
+- name: Get current postfix smtpd_client_restrictions
+  ansible.builtin.command: postconf -h smtpd_client_restrictions
+  register: postfix_client_restrictions
+  changed_when: false
+  failed_when: false
+  when:
+    - rhel9stig_stigrule_257951_Manage
+    - "'postfix' in ansible_facts.packages"
+
+- name: stigrule_257951__restrict_mail_relaying
+  ansible.builtin.command: "postconf -e 'smtpd_client_restrictions={{ rhel9stig_stigrule_257951_client_restrictions }}'"
+  register: postfix_relay_set
+  changed_when: postfix_relay_set.rc == 0
+  notify: reload_postfix
+  when:
+    - rhel9stig_stigrule_257951_Manage
+    - "'postfix' in ansible_facts.packages"
+    - postfix_client_restrictions.stdout | default('') != rhel9stig_stigrule_257951_client_restrictions
