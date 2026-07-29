@@ -5743,7 +5743,7 @@
     - rhel8STIG_stigrule_272484_Manage
     - >
       sudoers_d_files.matched | int == 0 or
-      "ansible_user not in (sudoers_d_files.files | map(attribute='path') | map('basename') | list)"
+      ansible_user not in (sudoers_d_files.files | map(attribute='path') | map('basename') | list)
 
 - name: SSH Availability Warning # noqa: ignore-errors
   ansible.builtin.fail:
@@ -5757,7 +5757,7 @@
     - rhel8STIG_stigrule_272484_Manage
     - >
       sudoers_d_files.matched | int == 0 or
-      "ansible_user not in (sudoers_d_files.files | map(attribute='path') | map('basename') | list)"
+      ansible_user not in (sudoers_d_files.files | map(attribute='path') | map('basename') | list)
 
 - name: stigrule_272484__Ensure_type_sysadm_t_present_on_etc_sudoers.d_lines
   ansible.builtin.lineinfile:
