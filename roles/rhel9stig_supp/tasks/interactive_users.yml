@@ -17,3 +17,4 @@
     - item.value[1] | int >= ( uid_min | int )
     - item.value[4] != "/"
     - "'nologin' not in item.value[5]"
+    - item.key != "nobody"
