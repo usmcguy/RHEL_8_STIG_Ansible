@@ -100,6 +100,7 @@ rhel9stig_stigrule_257819_key_fingerprints:
 rhel9stig_stigrule_257819_src_key_path: roles/rhel9stig_supp/files/RPM-GPG-KEY-redhat-release
 # R-257822 RHEL-09-214025
 rhel9stig_stigrule_257822_Manage: true
+rhel9stig_stigrule_257822_gpgcheck: 1
 # R-257826 RHEL-09-215015
 rhel9stig_stigrule_257826_Manage: true
 # R-257835 RHEL-09-215060
