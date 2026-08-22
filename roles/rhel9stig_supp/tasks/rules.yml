@@ -686,7 +686,7 @@
 - name: stigrule_257817_validate_fingerprints_present
   ansible.builtin.assert:
     that:
-      - item.fingerprint in validate_rpm_gpg_fingerprint.stdout
+      - item.fingerprint in (validate_rpm_gpg_fingerprint.stdout | default(rpm_gpg_fingerprint.stdout))
     fail_msg: "Fingerprint '{{ item.name }}' not found in key output"
     success_msg: "'{{ item.name }}' fingerprint verified"
   loop: "{{ rhel9stig_stigrule_257819_key_fingerprints }}"
@@ -3420,7 +3420,7 @@
     state: directory
     owner: root
     group: root
-    mode: '0711'
+    mode: '0700'
   when:
     - rhel9stig_stigrule_258123_Manage
 
@@ -3430,6 +3430,9 @@
     section: sssd
     option: certificate_verification
     state: absent
+    mode: '0600'
+    owner: root
+    group: root
   when:
     - rhel9stig_stigrule_258123_Manage
 
@@ -3448,6 +3451,9 @@
     section: sssd
     option: certificate_verification
     state: absent
+    mode: '0600'
+    owner: root
+    group: root
   loop: "{{ sssd_conf_d_files.files | default([]) | rejectattr('path', 'equalto', '/etc/sssd/conf.d/certificate_verification.conf') | list }}"
   loop_control:
     label: "{{ item.path }}"
