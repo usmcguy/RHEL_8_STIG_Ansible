@@ -1,9 +1,9 @@
 {imply "with-smartcard" if "with-smartcard-required"}
 auth        required                                     pam_env.so
 auth        required                                     pam_faildelay.so delay=2000000
-auth        required                                     pam_faillock.so preauth silent audit deny={{ rhel8STIG_stigrule_logon_DenyAttempts }} even_deny_root fail_interval={{ rhel8STIG_stigrule_login_FailInterval }} unlock_time={{ rhel8STIG_stigrule_login_UnlockTime }} {include if "with-faillock"}
+auth        required                                     pam_faillock.so preauth silent audit deny={{ rhel9stig_stigrule_logon_DenyAttempts }} dir={{ rhel9stig_stigrule_authselect_dir }} even_deny_root fail_interval={{ rhel9stig_stigrule_login_FailInterval }} unlock_time={{ rhel9stig_stigrule_login_UnlockTime }} {include if "with-faillock"}
 auth        [success=1 default=ignore]                   pam_succeed_if.so service notin login:gdm:xdm:kdm:kde:xscreensaver:gnome-screensaver:kscreensaver quiet use_uid {include if "with-smartcard-required"}
-auth        [success=done authinfo_unavail=ignore user_unknown=ignore ignore=ignore default=die]     pam_sss.so require_cert_auth ignore_authinfo_unavail   {include if "with-smartcard-required"}
+auth        [success=done ignore=ignore default=die authinfo_unavail=ignore user_unknown=ignore]     pam_sss.so require_cert_auth ignore_authinfo_unavail   {include if "with-smartcard-required"}
 auth        sufficient                                   pam_fprintd.so                                         {include if "with-fingerprint"}
 auth        sufficient                                   pam_u2f.so cue                                         {include if "with-pam-u2f"}
 auth        required                                     pam_u2f.so cue {if not "without-pam-u2f-nouserok":nouserok} {include if "with-pam-u2f-2fa"}
@@ -16,7 +16,7 @@ auth        [default=1 ignore=ignore success=ok]         pam_usertype.so isregul
 auth        sufficient                                   pam_sss_gss.so                                         {include if "with-gssapi"}
 auth        [default=1 ignore=ignore success=ok]         pam_usertype.so isregular
 auth        sufficient                                   pam_sss.so forward_pass
-auth        required                                     pam_faillock.so authfail dir={{ rhel8STIG_stigrule_authselect_dir }} unlock_time={{ rhel8STIG_stigrule_login_UnlockTime }} {include if "with-faillock"}
+auth        required                                     pam_faillock.so authfail dir={{ rhel9stig_stigrule_authselect_dir }} unlock_time={{ rhel9stig_stigrule_login_UnlockTime }} {include if "with-faillock"}
 auth        optional                                     pam_gnome_keyring.so only_if=login auto_start          {include if "with-pam-gnome-keyring"}
 auth        required                                     pam_deny.so
 
@@ -31,7 +31,7 @@ account     required                                     pam_permit.so
 password    requisite                                    pam_pwquality.so local_users_only
 password    [default=1 ignore=ignore success=ok]         pam_localuser.so                                       {include if "with-pwhistory"}
 password    requisite                                    pam_pwhistory.so use_authtok                           {include if "with-pwhistory"}
-password    sufficient                                   pam_unix.so sha512 shadow {if not "without-nullok":nullok} use_authtok
+password    sufficient                                   pam_unix.so sha512 shadow rounds={{ rhel9stig_stigrule_pam_unix_rounds }} {if not "without-nullok":nullok} use_authtok
 password    [success=1 default=ignore]                   pam_localuser.so
 password    sufficient                                   pam_sss.so use_authtok
 password    required                                     pam_deny.so
