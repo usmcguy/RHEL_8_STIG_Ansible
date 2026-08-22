@@ -57,3 +57,29 @@
   register: auth_select_apply
   changed_when: "'changes were applied' in auth_select_apply.stdout"
   notify: sssd_restart
+- name: sssd_restart
+  ansible.builtin.service:
+    name: sssd
+    state: restarted
+  when: "'sssd' in ansible_facts.packages"
+- name: restart_systemd_logind
+  ansible.builtin.service:
+    name: systemd-logind
+    state: restarted
+- name: restart_auditd
+  ansible.builtin.service:
+    name: auditd
+    state: restarted
+    use: service
+- name: augenrules_load
+  ansible.builtin.command: augenrules --load
+  register: augenrules_result
+  changed_when: augenrules_result.rc == 0
+- name: restart_fapolicyd
+  ansible.builtin.service:
+    name: fapolicyd
+    state: restarted
+- name: restart_named
+  ansible.builtin.service:
+    name: named
+    state: restarted
