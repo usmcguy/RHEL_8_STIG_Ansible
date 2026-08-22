@@ -13,3 +13,4 @@ ansible.cfg
 id_rsa*
 inventory*
 site.yml
+.claude/worktrees/

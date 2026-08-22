@@ -1,0 +1,40 @@
+- name: Gather facts
+  ansible.builtin.setup:
+    gather_subset:
+      - '!all'
+      - devices
+      - interfaces
+      - mounts
+
+# Conditions that must exist before executing the play
+- name: Check if using expected OS distribution and version
+  ansible.builtin.assert:
+    that:
+      - ansible_distribution is version(required_distribution, '==')
+      - ansible_distribution_major_version is version(required_distribution_version, '==')
+    fail_msg: |
+      Distribution Expected: {{ required_distribution }} | Distribution Found: {{ ansible_distribution }}
+      Version Expected: {{ required_distribution_version }} Version Found: {{ ansible_distribution_major_version }}
+
+- name: Check if minimum Python version is installed on controller
+  ansible.builtin.assert:
+    that:
+      - ansible_python_version is  version(minimum_python_version, '>=')
+    fail_msg: |
+      "Controller Python version is {{ ansible_python_version }}. It must be {{ minimum_python_version }} or greater!"
+  delegate_to: localhost
+
+# - name: Check if rhel8STIG_stigrule_230316_nameservers is defined properly
+#   ansible.builtin.assert:
+#     that:
+#       - rhel8STIG_stigrule_230316_nameservers is defined
+#       - >
+#         ( (rhel8STIG_stigrule_230316_cloud | bool) and (rhel8STIG_stigrule_230316_nameservers | length) > 0 ) or
+#         ( not (rhel8STIG_stigrule_230316_cloud | bool) and (rhel8STIG_stigrule_230316_nameservers | length) > 1 )
+#     fail_msg: |
+#       When using DNS, cloud systems require 1+ DNS servers if using highly available DNS, and rhel8STIG_stigrule_230316_cloud must be true.
+#       When using DNS, all non-cloud systems require 2+ DNS Servers,
+#       Found:
+#         rhel8STIG_stigrule_230316_nameservers: {{ rhel8STIG_stigrule_230316_nameservers | default([]) }}
+#         rhel8STIG_stigrule_230316_cloud: {{ rhel8STIG_stigrule_230316_cloud }}
+#   when: rhel8STIG_stigrule_230316_Manage

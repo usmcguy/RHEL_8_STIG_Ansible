@@ -1,0 +1,596 @@
+# Global vars
+rhel9stig_allow_system_reboot: true
+# Every sysctl.d precedence directory the STIG checks grep for conflicting keys.
+rhel9stig_stigrule_sysctl_dirs:
+  - /run/sysctl.d
+  - /usr/local/lib/sysctl.d
+  - /usr/lib/sysctl.d
+  - /lib/sysctl.d
+  - /etc/sysctl.d
+rhel9stig_stigrule_sysctl_file: /etc/sysctl.d/99-sysctl.conf
+# Local filesystem types walked by the whole system find based rules.
+rhel9stig_stigrule_local_fstypes:
+  - ext2
+  - ext3
+  - ext4
+  - xfs
+  - btrfs
+  - vfat
+rhel9stig_stigrule_audit_rules_file: /etc/audit/rules.d/stig.rules
+rhel9stig_stigrule_audit_tool_bins:
+  - /usr/sbin/auditctl
+  - /usr/sbin/auditd
+  - /usr/sbin/ausearch
+  - /usr/sbin/aureport
+  - /usr/sbin/autrace
+  - /usr/sbin/rsyslogd
+  - /usr/sbin/augenrules
+rhel9stig_stigrule_authselect_features:
+  - with-faillock
+  - with-files-access-provider
+  - with-files-domain
+  - with-mkhomedir
+  - with-smartcard
+  - with-smartcard-lock-on-removal
+  - with-sudo
+  - without-nullok
+rhel9stig_stigrule_authselect_force: true
+rhel9stig_stigrule_authselect_profile: sssd
+rhel9stig_stigrule_authselect_dir: /var/log/faillock
+rhel9stig_stigrule_crypto_policy: 'FIPS:STIG'
+rhel9stig_stigrule_logon_DenyAttempts: 3
+rhel9stig_stigrule_login_FailInterval: 900
+rhel9stig_stigrule_login_UnlockTime: 0
+rhel9stig_stigrule_pam_unix_rounds: 100000
+rhel9stig_stigrule_sssd_domain: fully.qualified.domain.name
+rhel9stig_stigrule_sssd_id_provider: files
+rhel9stig_stigrule_dod_banner_text: >-
+  You are accessing a U.S. Government (USG) Information System (IS) that is
+  provided for USG-authorized use only.\nBy using this IS (which includes any
+  device attached to this IS), you consent to the following conditions:\n-The USG
+  routinely intercepts and monitors communications on this IS for purposes
+  including, but not limited to, penetration testing, COMSEC monitoring, network
+  operations and defense, personnel misconduct (PM), law enforcement (LE), and
+  counterintelligence (CI) investigations.\n-At any time, the USG may inspect and
+  seize data stored on this IS.\n-Communications using, or data stored on, this
+  IS are not private, are subject to routine monitoring, interception, and search,
+  and may be disclosed or used for any USG-authorized purpose.\n-This IS includes
+  security measures (e.g., authentication and access controls) to protect USG
+  interests--not for your personal benefit or privacy.\n-Notwithstanding the
+  above, using this IS does not constitute consent to PM, LE or CI investigative
+  searching or monitoring of the content of privileged communications, or work
+  product, related to personal representation or services by attorneys,
+  psychotherapists, or clergy, and their assistants. Such communications and work
+  product are private and confidential. See User Agreement for details.
+# R-257778 RHEL-09-211015
+rhel9stig_stigrule_257778_Manage: true
+rhel9stig_stigrule_257778__dnf_State: latest
+# R-257781 RHEL-09-211030
+rhel9stig_stigrule_257781_Manage: true
+rhel9stig_stigrule_257781_target: 'multi-user.target'
+# R-257782 RHEL-09-211035
+rhel9stig_stigrule_257782_Manage: true
+# R-257787 RHEL-09-212010
+rhel9stig_stigrule_257787_Manage: true
+rhel9stig_stigrule_257787_grub_password: ChangeMe_!@12#$34
+# R-257788 RHEL-09-212015
+rhel9stig_stigrule_257788_Manage: true
+# R-257789 RHEL-09-212020
+rhel9stig_stigrule_257789_Manage: true
+rhel9stig_stigrule_257789_unique_name: grub_root
+# V-257792 RHEL-09-212035
+rhel9stig_stigrule_257792_Manage: true
+# V-257793 RHEL-09-212040
+rhel9stig_stigrule_257793_Manage: true
+# V-257794 RHEL-09-212045
+rhel9stig_stigrule_257794_Manage: true
+# V-257795 RHEL-09-212050
+rhel9stig_stigrule_257795_Manage: true
+# V-257796 RHEL-09-212055
+rhel9stig_stigrule_257796_Manage: true
+# R-257817 RHEL-09-213110
+rhel9stig_stigrule_257817_Manage: true
+# R-257819 RHEL-09-214010
+rhel9stig_stigrule_257819_Manage: true
+rhel9stig_stigrule_257819_key_fingerprints:
+  - name: Red Hat Release Key 2
+    fingerprint: 567E 347A D004 4ADE 55BA  8A5F 199E 2F91 FD43 1D51
+  - name: Red Hat Auxiliary Key 3
+    fingerprint: 7E46 2425 8C40 6535 D56D  6F13 5054 E4A4 5A63 40B3
+rhel9stig_stigrule_257819_src_key_path: roles/rhel9stig_supp/files/RPM-GPG-KEY-redhat-release
+# R-257822 RHEL-09-214025
+rhel9stig_stigrule_257822_Manage: true
+# R-257826 RHEL-09-215015
+rhel9stig_stigrule_257826_Manage: true
+# R-257835 RHEL-09-215060
+rhel9stig_stigrule_257835_Manage: true
+rhel9stig_stigrule_257835_keep_tftp: true
+# R-257837 RHEL-09-215070
+rhel9stig_stigrule_257837_Manage: true
+# R-257843 RHEL-09-231010
+rhel9stig_stigrule_257843_Manage: true
+# R-257844 RHEL-09-231015
+rhel9stig_stigrule_257844_Manage: true
+# R-257845 RHEL-09-231020
+rhel9stig_stigrule_257845_Manage: true
+# R-257846 RHEL-09-231025
+rhel9stig_stigrule_257846_Manage: true
+# R-257847 RHEL-09-231030
+rhel9stig_stigrule_257847_Manage: true
+# R-257848 RHEL-09-231035
+rhel9stig_stigrule_257848_Manage: true
+# R-257850 RHEL-09-231045
+rhel9stig_stigrule_257850_Manage: true
+# R-257851 RHEL-09-231050
+rhel9stig_stigrule_257851_Manage: true
+# R-257852 RHEL-09-231055
+rhel9stig_stigrule_257852_Manage: true
+# R-257854 RHEL-09-231065
+rhel9stig_stigrule_257854_Manage: true
+rhel9stig_stigrule_257854_ignore_paths: []
+# R-257855 RHEL-09-231070
+rhel9stig_stigrule_257855_Manage: true
+rhel9stig_stigrule_257855_ignore_paths: []
+# R-257856 RHEL-09-231075
+rhel9stig_stigrule_257856_Manage: true
+rhel9stig_stigrule_257856_ignore_paths: []
+# R-257857 RHEL-09-231080
+rhel9stig_stigrule_257857_Manage: true
+rhel9stig_stigrule_257857_ignore_paths: []
+# R-257858 RHEL-09-231085
+rhel9stig_stigrule_257858_Manage: true
+rhel9stig_stigrule_257858_ignore_paths: []
+# R-257859 RHEL-09-231090
+rhel9stig_stigrule_257859_Manage: true
+rhel9stig_stigrule_257859_ignore_paths: []
+# R-257860 RHEL-09-231095
+rhel9stig_stigrule_257860_Manage: true
+# R-257861 RHEL-09-231100
+rhel9stig_stigrule_257861_Manage: true
+# R-257862 RHEL-09-231105
+rhel9stig_stigrule_257862_Manage: true
+# R-257863 RHEL-09-231110
+rhel9stig_stigrule_257863_Manage: true
+# R-257864 RHEL-09-231115
+rhel9stig_stigrule_257864_Manage: true
+# R-257865 RHEL-09-231120
+rhel9stig_stigrule_257865_Manage: true
+# R-257866 RHEL-09-231125
+rhel9stig_stigrule_257866_Manage: true
+# R-257867 RHEL-09-231130
+rhel9stig_stigrule_257867_Manage: true
+# R-257868 RHEL-09-231135
+rhel9stig_stigrule_257868_Manage: true
+# R-257869 RHEL-09-231140
+rhel9stig_stigrule_257869_Manage: true
+# R-257870 RHEL-09-231145
+rhel9stig_stigrule_257870_Manage: true
+# R-257871 RHEL-09-231150
+rhel9stig_stigrule_257871_Manage: true
+# R-257872 RHEL-09-231155
+rhel9stig_stigrule_257872_Manage: true
+# R-257873 RHEL-09-231160
+rhel9stig_stigrule_257873_Manage: true
+# R-257874 RHEL-09-231165
+rhel9stig_stigrule_257874_Manage: true
+# R-257875 RHEL-09-231170
+rhel9stig_stigrule_257875_Manage: true
+# R-257876 RHEL-09-231175
+rhel9stig_stigrule_257876_Manage: true
+# R-257877 RHEL-09-231180
+rhel9stig_stigrule_257877_Manage: true
+# R-257878 RHEL-09-231180
+rhel9stig_stigrule_257878_Manage: true
+# R-257881 RHEL-09-231200
+rhel9stig_stigrule_257881_Manage: true
+rhel9stig_stigrule_257881_ignore_paths: []
+# R-257882 RHEL-09-232010
+rhel9stig_stigrule_257882_Manage: true
+rhel9stig_stigrule_257882_ignore_paths: []
+rhel9stig_stigrule_257882_bin_paths:
+  - /bin
+  - /sbin
+  - /usr/bin
+  - /usr/sbin
+  - /usr/libexec
+  - /usr/local/bin
+  - /usr/local/sbin
+# R-257883 RHEL-09-232015
+rhel9stig_stigrule_257883_Manage: true
+rhel9stig_stigrule_257883_ignore_paths: []
+rhel9stig_stigrule_257883_library_paths:
+  - /lib
+  - /lib64
+  - /usr/lib
+  - /usr/lib64
+# R-257884 RHEL-09-232020
+rhel9stig_stigrule_257884_Manage: true
+rhel9stig_stigrule_257884_ignore_paths: []
+rhel9stig_stigrule_257884_library_paths:
+  - /lib
+  - /lib64
+  - /usr/lib
+  - /usr/lib64
+# R-257887 RHEL-09-232035
+rhel9stig_stigrule_257887_Manage: true
+# R-257888 RHEL-09-232040
+rhel9stig_stigrule_257888_Manage: true
+# R-257889 RHEL-09-232045
+rhel9stig_stigrule_257889_Manage: true
+# R-257890 RHEL-09-232050
+rhel9stig_stigrule_257890_Manage: true
+# R-257918 RHEL-09-232190
+rhel9stig_stigrule_257918_Manage: true
+rhel9stig_stigrule_257918_ignore_paths: []
+rhel9stig_stigrule_257918_bin_paths:
+  - /bin
+  - /sbin
+  - /usr/bin
+  - /usr/sbin
+  - /usr/libexec
+  - /usr/local/bin
+  - /usr/local/sbin
+# R-257919 RHEL-09-232195
+rhel9stig_stigrule_257919_Manage: true
+rhel9stig_stigrule_257919_ignore_paths: []
+rhel9stig_stigrule_257919_chgrp_acct: root
+rhel9stig_stigrule_257919_bin_paths:
+  - /bin
+  - /sbin
+  - /usr/bin
+  - /usr/sbin
+  - /usr/libexec
+  - /usr/local/bin
+  - /usr/local/sbin
+# R-257920 RHEL-09-232200
+rhel9stig_stigrule_257920_Manage: true
+rhel9stig_stigrule_257920_ignore_paths: []
+rhel9stig_stigrule_257920_library_paths:
+  - /lib
+  - /lib64
+  - /usr/lib
+  - /usr/lib64
+# R-257921 RHEL-09-232205
+rhel9stig_stigrule_257921_Manage: true
+rhel9stig_stigrule_257921_ignore_paths: []
+rhel9stig_stigrule_257921_chgrp_acct: root
+rhel9stig_stigrule_257921_library_paths:
+  - /lib
+  - /lib64
+  - /usr/lib
+  - /usr/lib64
+# R-257922 RHEL-09-232205
+rhel9stig_stigrule_257922_Manage: true
+rhel9stig_stigrule_257922_ignore_paths: []
+rhel9stig_stigrule_257922_library_paths:
+  - /lib
+  - /lib64
+  - /usr/lib
+  - /usr/lib64
+# R-257923 RHEL-09-232215
+rhel9stig_stigrule_257923_Manage: true
+rhel9stig_stigrule_257923_ignore_paths: []
+rhel9stig_stigrule_257923_chgrp_acct: root
+rhel9stig_stigrule_257923_library_paths:
+  - /lib
+  - /lib64
+  - /usr/lib
+  - /usr/lib64
+# R-257924 RHEL-09-232220
+rhel9stig_stigrule_257924_Manage: true
+# R-257925 RHEL-09-232225
+rhel9stig_stigrule_257925_Manage: true
+# R-257926 RHEL-09-232230
+rhel9stig_stigrule_257926_Manage: true
+rhel9stig_stigrule_257926_cron_paths:
+  - /etc/cron.d
+  - /etc/cron.daily
+  - /etc/cron.deny
+  - /etc/cron.hourly
+  - /etc/cron.monthly
+  - /etc/cron.weekly
+  - /etc/crontab
+# R-257927 RHEL-09-232235
+rhel9stig_stigrule_257927_Manage: true
+rhel9stig_stigrule_257927_cron_paths:
+  - /etc/cron.d
+  - /etc/cron.daily
+  - /etc/cron.deny
+  - /etc/cron.hourly
+  - /etc/cron.monthly
+  - /etc/cron.weekly
+  - /etc/crontab
+# R-257928 RHEL-09-232240
+rhel9stig_stigrule_257928_Manage: true
+rhel9stig_stigrule_257928_ignore_paths: []
+rhel9stig_stigrule_257928_new_owner: root
+# R-257929 RHEL-09-232245
+rhel9stig_stigrule_257929_Manage: true
+rhel9stig_stigrule_257929_ignore_paths: []
+# R-257930 RHEL-09-232250
+rhel9stig_stigrule_257930_Manage: true
+rhel9stig_stigrule_257930_ignore_paths: []
+rhel9stig_stigrule_257930_new_group: root
+# R-257931 RHEL-09-232255
+rhel9stig_stigrule_257931_Manage: true
+rhel9stig_stigrule_257931_ignore_paths: []
+rhel9stig_stigrule_257931_new_owner: root
+# R-257932 RHEL-09-232260
+rhel9stig_stigrule_257932_Manage: true
+rhel9stig_stigrule_257932_ignore_devices:
+  - /dev/vmci
+# R-257937 RHEL-09-251020
+rhel9stig_stigrule_257937_Manage: true
+rhel9stig_stigrule_257937_zone: drop
+rhel9stig_stigrule_257937_zoneDesc: >
+  Unsolicited incoming network packets are dropped.
+  Incoming packets that are related to outgoing network connections are accepted.
+  Outgoing network connections are allowed.
+rhel9stig_stigrule_257937_allowed_services:
+  - ssh
+rhel9stig_stigrule_257937_allowed_ports: []
+# R-257941 RHEL-09-251040
+rhel9stig_stigrule_257941_Manage: true
+rhel9stig_stigrule_257941_ignore_interfaces: []
+# R-257945 RHEL-09-252020
+rhel9stig_stigrule_257945_Manage: true
+rhel9stig_stigrule_257945_maxpoll: 16
+rhel9stig_stigrule_257945_ntp_servers:
+  - 0.us.pool.ntp.mil
+# R-257948 RHEL-09-252035
+rhel9stig_stigrule_257948_Manage: true
+# Set true when the cloud provider supplies a single highly available DNS IP,
+# which makes RHEL-09-252035 not applicable.
+rhel9stig_stigrule_257948_not_applicable: false
+rhel9stig_stigrule_257948_nameservers: []
+rhel9stig_stigrule_257948_ip_family: ipv4
+# Leave empty to use the first active NetworkManager connection.
+rhel9stig_stigrule_257948_connection: ''
+# R-257950 RHEL-09-252045
+rhel9stig_stigrule_257950_Manage: true
+rhel9stig_stigrule_257950_approved_tunnels: []
+rhel9stig_stigrule_257950_disable_unused_ipsec: true
+# R-257951 RHEL-09-252050
+rhel9stig_stigrule_257951_Manage: true
+rhel9stig_stigrule_257951_client_restrictions: permit_mynetworks,reject
+# R-257953 RHEL-09-252060
+rhel9stig_stigrule_257953_Manage: true
+rhel9stig_stigrule_257953_postmaster_alias: root
+# R-257955 RHEL-09-252070
+rhel9stig_stigrule_257955_Manage: true
+# R-257956 RHEL-09-252075
+rhel9stig_stigrule_257956_Manage: true
+# R-257989 RHEL-09-255065
+rhel9stig_stigrule_257989_Manage: true
+rhel9stig_stigrule_257989_approved_ciphers:
+  - aes256-gcm@openssh.com
+  - aes256-ctr
+  - aes128-gcm@openssh.com
+  - aes128-ctr
+# R-257991 RHEL-09-255075
+rhel9stig_stigrule_257991_Manage: true
+rhel9stig_stigrule_257991_approved_macs:
+  - hmac-sha2-256-etm@openssh.com
+  - hmac-sha2-512-etm@openssh.com
+  - hmac-sha2-256
+  - hmac-sha2-512
+# R-257999 RHEL-09-255115
+rhel9stig_stigrule_257999_Manage: true
+# R-258000 RHEL-09-255120
+rhel9stig_stigrule_258000_Manage: true
+# R-258001 RHEL-09-255125
+rhel9stig_stigrule_258001_Manage: true
+# R-258018 RHEL-09-271040
+rhel9stig_stigrule_258018_Manage: true
+# R-258028 RHEL-09-271090
+rhel9stig_stigrule_258028_Manage: true
+# R-258029 RHEL-09-271095
+rhel9stig_stigrule_258029_Manage: true
+# R-258038 RHEL-09-291030
+rhel9stig_stigrule_258038_Manage: true
+# R-258042 RHEL-09-411015
+rhel9stig_stigrule_258042_Manage: true
+rhel9stig_stigrule_258042_max_days: 60
+rhel9stig_stigrule_258042_exempt_users: []
+# R-258044 RHEL-09-411025
+rhel9stig_stigrule_258044_Manage: true
+rhel9stig_stigrule_258044_umask: '077'
+# R-258045 RHEL-09-411030
+rhel9stig_stigrule_258045_Manage: true
+# R-258046 RHEL-09-411035
+rhel9stig_stigrule_258046_Manage: true
+rhel9stig_stigrule_258046_exempt_accounts:
+  - root
+# R-258048 RHEL-09-411045
+rhel9stig_stigrule_258048_Manage: true
+# R-258050 RHEL-09-411055
+rhel9stig_stigrule_258050_Manage: true
+# R-258051 RHEL-09-411060
+rhel9stig_stigrule_258051_Manage: true
+# R-258052 RHEL-09-411065
+rhel9stig_stigrule_258052_Manage: true
+# R-258053 RHEL-09-411070
+rhel9stig_stigrule_258053_Manage: true
+# R-258059 RHEL-09-411100
+rhel9stig_stigrule_258059_Manage: true
+# R-258061 RHEL-09-411110
+rhel9stig_stigrule_258061_Manage: true
+# R-258068 RHEL-09-412035
+rhel9stig_stigrule_258068_Manage: true
+rhel9stig_stigrule_258068_tmout: 600
+# R-258077 RHEL-09-412080
+rhel9stig_stigrule_258077_Manage: true
+rhel9stig_stigrule_258077_idle_seconds: 600
+# R-258080 RHEL-09-431020
+rhel9stig_stigrule_258080_Manage: true
+# R-258085 RHEL-09-432020
+rhel9stig_stigrule_258085_Manage: true
+rhel9stig_stigrule_258085_ConfigFile: /etc/sudoers.d/99-stig-password-policy
+# R-258086 RHEL-09-432025
+rhel9stig_stigrule_258086_Manage: true
+# R-258087 RHEL-09-432030
+rhel9stig_stigrule_258087_Manage: true
+# R-258088 RHEL-09-432035
+rhel9stig_stigrule_258088_Manage: true
+# R-258091 RHEL-09-611010
+rhel9stig_stigrule_258091_Manage: true
+rhel9stig_stigrule_258091_retry: 3
+# R-258094 RHEL-09-611025
+rhel9stig_stigrule_258094_Manage: true
+# R-258095 RHEL-09-611030
+rhel9stig_stigrule_258095_Manage: true
+# R-258096 RHEL-09-611035
+rhel9stig_stigrule_258096_Manage: true
+# R-258097 RHEL-09-611040
+rhel9stig_stigrule_258097_Manage: true
+# R-258098 RHEL-09-611045
+rhel9stig_stigrule_258098_Manage: true
+# R-258099 RHEL-09-611050
+rhel9stig_stigrule_258099_Manage: true
+# R-258100 RHEL-09-611055
+rhel9stig_stigrule_258100_Manage: true
+# R-258105 RHEL-09-611080
+rhel9stig_stigrule_258105_Manage: true
+rhel9stig_stigrule_258105_min_days: 1
+rhel9stig_stigrule_258105_exempt_users: []
+# R-258106 RHEL-09-611085
+rhel9stig_stigrule_258106_Manage: true
+rhel9stig_stigrule_258106_exempt_users: []
+# R-258118 RHEL-09-611145
+rhel9stig_stigrule_258118_Manage: true
+# R-258120 RHEL-09-611155
+rhel9stig_stigrule_258120_Manage: true
+rhel9stig_stigrule_258120_IgnoreSvcAccts: true
+# R-258123 RHEL-09-611170
+rhel9stig_stigrule_258123_Manage: true
+rhel9stig_stigrule_258123_ocsp_dgst: sha512
+# R-258129 RHEL-09-611200
+rhel9stig_stigrule_258129_Manage: true
+# R-258131 RHEL-09-631010
+rhel9stig_stigrule_258131_Manage: true
+rhel9stig_stigrule_258131_ca_bundle_path: files/unclass-certificates_pkcs7_DoD.zip
+rhel9stig_stigrule_258131_remove_non_dod: true
+rhel9stig_stigrule_258131_remove_expired: true
+rhel9stig_stigrule_258131_cleanup_report_only: false
+# R-258134 RHEL-09-651010
+rhel9stig_stigrule_258134_Manage: true
+# R-258135 RHEL-09-651015
+rhel9stig_stigrule_258135_Manage: true
+rhel9stig_stigrule_258135_frequency: daily
+rhel9stig_stigrule_258135_notify_email: root@localhost
+# R-258136 RHEL-09-651020
+rhel9stig_stigrule_258136_Manage: true
+# R-258137 RHEL-09-651025
+rhel9stig_stigrule_258137_Manage: true
+rhel9stig_stigrule_258137_audit_tool_rule: p+i+n+u+g+s+b+acl+xattrs+sha512
+# R-258138 RHEL-09-651030
+rhel9stig_stigrule_258138_Manage: true
+# R-258139 RHEL-09-651035
+rhel9stig_stigrule_258139_Manage: true
+# R-258143 RHEL-09-652025
+rhel9stig_stigrule_258143_Manage: true
+rhel9stig_stigrule_258143_is_log_aggregator: false
+rhel9stig_stigrule_258143_input_directives:
+  - InputTCPServerRun
+  - UDPServerRun
+  - RELPServerRun
+  - 'module\(load="imtcp"\)'
+  - 'module\(load="imudp"\)'
+  - 'module\(load="imrelp"\)'
+  - 'input\(type="imudp"'
+  - 'input\(type="imtcp"'
+  - 'input\(type="imrelp"'
+# R-258149 RHEL-09-652055
+rhel9stig_stigrule_258149_Manage: true
+rhel9stig_stigrule_258149_remote_server: ''
+rhel9stig_stigrule_258149_remote_port: 514
+rhel9stig_stigrule_258149_retry_count: -1
+rhel9stig_stigrule_258149_queue_size: 10000
+# R-258155 RHEL-09-653030
+rhel9stig_stigrule_258155_Manage: true
+rhel9stig_stigrule_258155_min_size_gb: 10
+# R-258165 RHEL-09-653080
+rhel9stig_stigrule_258165_Manage: true
+# R-258166 RHEL-09-653085
+rhel9stig_stigrule_258166_Manage: true
+# R-258167 RHEL-09-653090
+rhel9stig_stigrule_258167_Manage: true
+# R-258171 RHEL-09-653110
+rhel9stig_stigrule_258171_Manage: true
+# R-258173 RHEL-09-653120
+rhel9stig_stigrule_258173_Manage: true
+rhel9stig_stigrule_258173_backlog_limit: 8192
+# R-258174 RHEL-09-653125
+rhel9stig_stigrule_258174_Manage: true
+rhel9stig_stigrule_258174_root_alias: root
+# R-258215 RHEL-09-654205
+rhel9stig_stigrule_258215_Manage: true
+# R-258216 RHEL-09-654210
+rhel9stig_stigrule_258216_Manage: true
+# R-258230 RHEL-09-671010
+rhel9stig_stigrule_258230_Manage: true
+# R-258231 RHEL-09-671015
+rhel9stig_stigrule_258231_Manage: true
+rhel9stig_stigrule_258231_lock_accounts: true
+# R-258232 RHEL-09-671020
+rhel9stig_stigrule_258232_Manage: true
+# R-258233 RHEL-09-671025
+rhel9stig_stigrule_258233_Manage: true
+# R-258236 RHEL-09-672020
+rhel9stig_stigrule_258236_Manage: true
+# R-258241 RHEL-09-215105
+rhel9stig_stigrule_258241_Manage: true
+rhel9stig_stigrule_258241_ssh_ciphers:
+  - AES-256-GCM
+  - AES-256-CTR
+  - AES-128-GCM
+  - AES-128-CTR
+rhel9stig_stigrule_258241_ssh_macs:
+  - HMAC-SHA2-512
+  - HMAC-SHA2-256
+rhel9stig_stigrule_258241_min_rsa_size: 2048
+# R-258242 RHEL-09-672050
+rhel9stig_stigrule_258242_Manage: true
+# R-270174 RHEL-09-171011
+rhel9stig_stigrule_270174_Manage: true
+# R-270175 RHEL-09-232103
+rhel9stig_stigrule_270175_Manage: true
+# R-270176 RHEL-09-232104
+rhel9stig_stigrule_270176_Manage: true
+# R-270177 RHEL-09-255064
+rhel9stig_stigrule_270177_Manage: true
+rhel9stig_stigrule_270177_approved_ciphers:
+  - aes256-gcm@openssh.com
+  - aes256-ctr
+  - aes128-gcm@openssh.com
+  - aes128-ctr
+# R-270178 RHEL-09-255070
+rhel9stig_stigrule_270178_Manage: true
+rhel9stig_stigrule_270178_approved_macs:
+  - hmac-sha2-256-etm@openssh.com
+  - hmac-sha2-512-etm@openssh.com
+  - hmac-sha2-256
+  - hmac-sha2-512
+# R-270180 RHEL-09-433016
+rhel9stig_stigrule_270180_Manage: true
+rhel9stig_stigrule_270180_enforcing: false
+rhel9stig_stigrule_270180_deny_option: deny_log
+# R-272496 RHEL-09-431016
+# Designated sudoers administrator group for SELinux context elevation.
+rhel9stig_stigrule_272496_Manage: true
+rhel9stig_stigrule_272496_admin_group: wheel
+rhel9stig_stigrule_272496_selinux_type: sysadm_t
+rhel9stig_stigrule_272496_selinux_role: sysadm_r
+rhel9stig_stigrule_272496_mcs_range: 's0-s0:c0.c1023'
+# Additional individual users (beyond %admin_group members) to map to sysadm_u.
+# ansible_user is always added automatically as a lockout safety net.
+rhel9stig_stigrule_272496_sysadm_u_selinux_users: []
+rhel9stig_stigrule_272496_ignore_files: []
+# Optional hardening beyond what RHEL9's STIG requires (no RHEL9 rule mandates
+# this, unlike RHEL8's V-254520): map the __default__ SELinux login (i.e. any
+# account not otherwise mapped) to a specific SELinux user. Off by default,
+# since it affects every unmapped login on the box, not just the designated
+# admin group's sudo path.
+rhel9stig_stigrule_272496_set_default_user_context: false
+rhel9stig_stigrule_272496_default_selinux_user: user_u
+rhel9stig_stigrule_272496_default_mcs_range: s0

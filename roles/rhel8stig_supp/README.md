@@ -1,4 +1,4 @@
-# usmcguy.rhel8stig_supp
+# usmcguy.stigs.rhel8stig_supp
 ===============
 
 A supplemental Ansible role for applying selected RHEL 8 STIG rules and configurations.
@@ -52,7 +52,7 @@ Example Playbook
     - hosts: rhel8_servers
       become: true
       roles:
-        - role: usmcguy.rhel8stig_supp
+        - role: usmcguy.stigs.rhel8stig_supp
           vars:
             rhel8STIG_allow_system_reboot: false
             rhel8STIG_stigrule_authselect_profile: "sssd"

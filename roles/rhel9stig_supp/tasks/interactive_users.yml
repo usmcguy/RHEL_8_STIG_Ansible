@@ -1,0 +1,20 @@
+- name: Get user account info
+  ansible.builtin.getent:
+    database: passwd
+  register: getent_passwd
+
+- name: Initialize interactive user list
+  ansible.builtin.set_fact:
+    interactive_user_list: []
+
+- name: Create interactive user list
+  ansible.builtin.set_fact:
+    interactive_user_list: "{{ interactive_user_list + [item] }}"
+  loop: "{{ ansible_facts.getent_passwd | dict2items }}"
+  no_log: true
+  when:
+    - item.value is sequence
+    - item.value[1] | int >= ( uid_min | int )
+    - item.value[4] != "/"
+    - "'nologin' not in item.value[5]"
+    - item.key != "nobody"

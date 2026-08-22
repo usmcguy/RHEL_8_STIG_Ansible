@@ -1,0 +1,18 @@
+# Basic System Function
+allow perm=any dir=/etc/ : all
+allow perm=any dir=/usr/bin/ : all
+allow perm=any dir=/usr/lib/ : all
+allow perm=any dir=/usr/lib64/ : all
+allow perm=any dir=/usr/libexec/ : all
+allow perm=any dir=/usr/sbin/ : all
+allow perm=any dir=/usr/sbin/ : all
+allow perm=any dir=/usr/share/ : all
+allow perm=any dir=/var/lib/ : all
+allow perm=any dir=/usr/share/ : all
+
+# Allow all kernel thread workers
+allow perm=open ppid=2 : dir=systemdirs all
+allow perm=open ppid=2 : dir=systemdirs all
+allow perm=open ppid=2 : dir=/usr/bin all
+allow perm=open ppid=2 : dir=/usr/lib/systemd all
+allow perm=open ppid=2 : dir=/usr/bin all

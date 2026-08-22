@@ -1,0 +1,6 @@
+# SSH rules
+allow perm=execute exe=/usr/sbin/sshd : trust=1
+allow perm=execute dir=/usr/libexec/openssh : trust=1
+
+# Allow SCP to work
+allow perm=open exe=/usr/bin/bash : path=/usr/libexec/openssh/sftp-server ftype=application/x-executable trust=1

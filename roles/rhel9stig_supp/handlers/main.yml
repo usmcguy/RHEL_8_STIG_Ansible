@@ -1,0 +1,85 @@
+- name: grub2_update
+  ansible.builtin.command: grub2-mkconfig -o /boot/grub2/grub.cfg
+  args:
+    creates: /boot/grub2/grub.cfg
+- name: restart_aide
+  ansible.builtin.systemd_service:
+    name: aide
+    state: restarted
+- name: reboot
+  ansible.builtin.reboot:
+    reboot_timeout: 600
+  when: rhel9stig_allow_system_reboot
+- name: restart_chronyd
+  ansible.builtin.service:
+    name: chronyd
+    state: restarted
+- name: ssh_restart
+  ansible.builtin.service:
+    name: sshd
+    state: restarted
+  no_log: true
+- name: NetworkManager_restart
+  ansible.builtin.service:
+    name: NetworkManager
+    state: restarted
+- name: restart_rsyslog
+  ansible.builtin.service:
+    name: rsyslog
+    state: restarted
+- name: restart_usbguard
+  ansible.builtin.service:
+    name: usbguard
+    state: restarted
+- name: dconf_update
+  ansible.builtin.command:
+    cmd: dconf update
+  register: dconf_result
+  changed_when: dconf_result.rc == 0
+- name: reload_postfix
+  ansible.builtin.service:
+    name: postfix
+    state: reloaded
+- name: daemon_reload
+  ansible.builtin.systemd:
+    daemon_reload: true
+- name: restart_tftp
+  ansible.builtin.service:
+    name: tftp
+    state: restarted
+- name: restart_ipsec
+  ansible.builtin.service:
+    name: ipsec
+    state: restarted
+  when: "'libreswan' in ansible_facts.packages"
+- name: apply_authselect_changes
+  ansible.builtin.command: authselect apply-changes
+  register: auth_select_apply
+  changed_when: "'changes were applied' in auth_select_apply.stdout"
+  notify: sssd_restart
+- name: sssd_restart
+  ansible.builtin.service:
+    name: sssd
+    state: restarted
+  when: "'sssd' in ansible_facts.packages"
+- name: restart_systemd_logind
+  ansible.builtin.service:
+    name: systemd-logind
+    state: restarted
+- name: restart_auditd
+  ansible.builtin.service:
+    name: auditd
+    state: restarted
+    use: service
+- name: augenrules_load
+  ansible.builtin.command: augenrules --load
+  register: augenrules_result
+  changed_when: augenrules_result.rc == 0
+- name: restart_fapolicyd
+  ansible.builtin.service:
+    name: fapolicyd
+    state: restarted
+- name: restart_named
+  ansible.builtin.service:
+    name: named
+    state: restarted

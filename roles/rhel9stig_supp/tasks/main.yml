@@ -1,0 +1,7 @@
+- name: Perfrom STIG Precondition checks
+  ansible.builtin.include_tasks:
+    file: precondition.yml
+
+- name: Apply STIG Rule tasks
+  ansible.builtin.include_tasks:
+    file: rules.yml

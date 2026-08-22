@@ -1,0 +1,44 @@
+# - name: Get mount info in /etc/fstab for '{{ disk_partition }}'
+#   ansible.builtin.shell:
+#     cmd: |
+#       set -o pipefail
+#       grep '{{ disk_partition }}' /etc/fstab || true
+#   register: fstab_part_entry
+#   changed_when: false
+
+- name: "stigrule_{{ stig_rule_id }}__fail_on_no_{{ disk_partition }}_partition" # noqa:name[template]
+  ansible.builtin.fail:
+    msg: The path '{{ disk_partition }}' is not on a seperate partition
+  when:
+    # - fstab_part_entry.stdout | length == 0
+    - ansible_facts.mounts | selectattr('mount', 'equalto', disk_partition) | list | length == 0
+
+- name: "stigrule_{{ stig_rule_id }}__add_{{ partition_option | default('') }}_{{ disk_partition }}_etc_fstab" # noqa:name[template]
+  ansible.builtin.lineinfile:
+    path: /etc/fstab
+    regexp: '^(\S+\s+{{ disk_partition }}\s+\S+\s+)(\S+)(\s+\S+\s+\S+)$'
+    line: >-
+      \g<1>{{
+        (
+          (
+            "\2".replace(" ", "").split(",")
+          ) +
+          (
+            [partition_option] if partition_option not in "\2".replace(" ", "").split(",") else []
+          )
+        ) | join(",")
+      }}\3
+    backrefs: true
+  register: modify_fstab_part
+  when:
+    # - fstab_part_entry.stdout | length != 0
+    - ansible_facts.mounts | selectattr('mount', 'equalto', disk_partition) | list | length > 0
+    - partition_option is defined
+    # - partition_option not in fstab_part_entry.stdout
+    - partition_option not in (ansible_facts.mounts | selectattr('mount', 'equalto', disk_partition) | first).options
+
+- name: Remount partition {{ disk_partition }}
+  ansible.posix.mount:
+    path: "{{ disk_partition }}"
+    state: remounted
+  when: modify_fstab_part.changed # noqa:no-handler
