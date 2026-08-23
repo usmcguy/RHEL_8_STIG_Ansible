@@ -1,0 +1,48 @@
+---
+# Container-based smoke test for rhel9stig_supp. This is NOT a substitute
+# for the live-VM run against rhel9.edentree.home (see CLAUDE.md) — a
+# meaningful subset of rules (GRUB/kernel cmdline, disk partitioning,
+# FIPS+reboot, real auditd/kernel-audit behavior, SELinux enforcement
+# specifics) cannot mean anything inside a container and must stay on the
+# live-VM tier. This scenario exists to catch the OTHER class of bug that
+# dominated debugging this collection: missing register:, dangling notify:,
+# and non-idempotent tasks — molecule's converge+idempotence sequence is
+# well-suited to exactly that, in seconds instead of a 30-90 minute VM run.
+driver:
+  name: podman
+platforms:
+  - name: rhel9stig-molecule
+    image: registry.access.redhat.com/ubi9/ubi-init:latest
+    pre_build_image: true
+    systemd: always
+    command: /usr/sbin/init
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:rw
+    capabilities:
+      - SYS_ADMIN
+provisioner:
+  name: ansible
+  env:
+    # Must match ansible.cfg's collections_path at the repo root - keep the
+    # two in sync if either ever changes.
+    ANSIBLE_COLLECTIONS_PATH: /home/dave/gitCode:/home/dave/.ansible/collections:/usr/share/ansible/collections
+  inventory:
+    host_vars:
+      rhel9stig-molecule:
+        # No real bootloader, no real reboot capability, no real disk
+        # partitions inside a container - keep those rule families disabled
+        # for this scenario rather than let them fail on infrastructure
+        # they can't act on. Live-VM testing remains authoritative for them.
+        rhel9stig_allow_system_reboot: false
+        rhel9stig_stigrule_258230_Manage: false  # FIPS mode: needs a real reboot
+verifier:
+  name: ansible
+scenario:
+  test_sequence:
+    - dependency
+    - create
+    - prepare
+    - converge
+    - idempotence
+    - verify
+    - destroy
