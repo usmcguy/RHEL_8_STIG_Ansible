@@ -4069,7 +4069,7 @@
 
 - name: stigrule_258135__ensure_mailx_present
   ansible.builtin.dnf:
-    name: mailx
+    name: s-nail
     state: present
   when: rhel9stig_stigrule_258135_Manage
 
@@ -4132,7 +4132,6 @@
     - aide_missing_sha512 | default('0') | int > 0
   register: aide_sha512
   changed_when: aide_sha512.rc == 0
-  notify: restart_aide
 
 # R-258137 RHEL-09-651025
 - name: stigrule_258137__protect_audit_tools_with_aide
@@ -4144,7 +4143,6 @@
     group: root
     mode: '0640'
   loop: "{{ rhel9stig_stigrule_audit_tool_bins }}"
-  notify: restart_aide
   when:
     - rhel9stig_stigrule_258137_Manage
     - aide_conf.stat.exists | default(false)
@@ -4165,7 +4163,6 @@
     - aide_missing_acl | default('0') | int > 0
   register: aide_acl
   changed_when: aide_acl.rc == 0
-  notify: restart_aide
 
 # V-258139 RHEL-09-651035
 - name: stigrule_258139__ensure_aide_xattrs
@@ -4183,7 +4180,6 @@
     - aide_missing_xattrs | default('0') | int > 0
   register: aide_xattrs
   changed_when: aide_xattrs.rc == 0
-  notify: restart_aide
 
 # R-258143 RHEL-09-652025
 - name: Find rsyslog remote log reception directives

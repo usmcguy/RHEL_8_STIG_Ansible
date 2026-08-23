@@ -2,10 +2,6 @@
   ansible.builtin.command: grub2-mkconfig -o /boot/grub2/grub.cfg
   args:
     creates: /boot/grub2/grub.cfg
-- name: restart_aide
-  ansible.builtin.systemd_service:
-    name: aide
-    state: restarted
 - name: reboot
   ansible.builtin.reboot:
     reboot_timeout: 600
