@@ -4413,6 +4413,7 @@
   when:
     - rhel9stig_stigrule_258174_Manage
     - rhel9stig_stigrule_258174_root_alias | length > 0
+    - "'postfix' in ansible_facts.packages"
 
 - name: stigrule_258174__rebuild_aliases_database
   ansible.builtin.command: newaliases
@@ -4420,6 +4421,7 @@
   changed_when: audit_newaliases.rc == 0
   when:
     - rhel9stig_stigrule_258174_Manage
+    - "'postfix' in ansible_facts.packages"
     - root_alias.changed # noqa:no-handler
 
 - name: stigrule_258174__report_no_root_alias
