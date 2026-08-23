@@ -6,12 +6,23 @@
 #   register: fstab_part_entry
 #   changed_when: false
 
+- name: "Stat {{ disk_partition }} for separate-partition check"
+  ansible.builtin.stat:
+    path: "{{ disk_partition }}"
+  register: partition_option_target_stat
+
+- name: "Stat parent of {{ disk_partition }} for separate-partition check"
+  ansible.builtin.stat:
+    path: "{{ disk_partition | dirname }}"
+  register: partition_option_parent_stat
+
 - name: "stigrule_{{ stig_rule_id }}__fail_on_no_{{ disk_partition }}_partition" # noqa:name[template]
   ansible.builtin.fail:
     msg: The path '{{ disk_partition }}' is not on a seperate partition
-  when:
-    # - fstab_part_entry.stdout | length == 0
-    - ansible_facts.mounts | selectattr('mount', 'equalto', disk_partition) | list | length == 0
+  when: >-
+    not partition_option_target_stat.stat.exists
+    or not partition_option_parent_stat.stat.exists
+    or partition_option_target_stat.stat.dev == partition_option_parent_stat.stat.dev
 
 - name: "stigrule_{{ stig_rule_id }}__add_{{ partition_option | default('') }}_{{ disk_partition }}_etc_fstab" # noqa:name[template]
   ansible.builtin.lineinfile:
