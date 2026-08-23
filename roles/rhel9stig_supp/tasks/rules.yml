@@ -4045,12 +4045,22 @@
   async: 1800
   poll: 30
   register: aide_out
-  changed_when: "'AIDE initialized database' in aide_out.stdout"
+  changed_when: aide_out.rc == 0
   when:
     - rhel9stig_stigrule_258134_Manage
     - >
       (aide_db_stat.stat.exists and (aide_check_output.stderr | length > 0))
       or (not aide_db_stat.stat.exists)
+
+- name: Stat newly (re)initialized AIDE database
+  ansible.builtin.stat:
+    path: /var/lib/aide/aide.db.new.gz
+    get_checksum: false
+    get_mime: false
+  register: aide_new_db_stat
+  when:
+    - rhel9stig_stigrule_258134_Manage
+    - aide_out is not skipped
 
 - name: stigrule_258134__rename_AIDE_db
   ansible.builtin.command: mv -f /var/lib/aide/aide.db.new.gz /var/lib/aide/aide.db.gz
@@ -4058,7 +4068,7 @@
   register: aide_move
   when:
     - rhel9stig_stigrule_258134_Manage
-    - aide_out.changed
+    - aide_new_db_stat.stat.exists | default(false)
 
 # R-258135 RHEL-09-651015
 - name: stigrule_258135__ensure_aide_present
