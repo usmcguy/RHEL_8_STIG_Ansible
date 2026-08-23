@@ -1581,7 +1581,7 @@
 - name: stigrule_257920__chown_library_files
   ansible.builtin.shell: |
     set -o pipefail
-    find {{ rhel9stig_stigrule_257920_bin_paths | join(' ') }} {{ exclude_chown_library_cmd }} -type f -name '*.so*' ! -user root -exec ls -al {} + -exec chown root {} + || true
+    find {{ rhel9stig_stigrule_257920_library_paths | join(' ') }} {{ exclude_chown_library_cmd }} -type f -name '*.so*' ! -user root -exec ls -al {} + -exec chown root {} + || true
   register: chown_library_cmds
   changed_when: chown_library_cmds.stdout | length > 0
   when: rhel9stig_stigrule_257920_Manage
@@ -1614,7 +1614,7 @@
 - name: stigrule_257921__chgrp_library_files
   ansible.builtin.shell: |
     set -o pipefail
-    find {{ rhel9stig_stigrule_257921_bin_paths | join(' ') }} {{ exclude_chgrp_library_cmd }} -gid +{{ sys_gid_max }} -type f -name '*.so*' -exec ls -al {} + -exec chgrp {{ rhel9stig_stigrule_257921_chgrp_acct }} {} + || true
+    find {{ rhel9stig_stigrule_257921_library_paths | join(' ') }} {{ exclude_chgrp_library_cmd }} -gid +{{ sys_gid_max }} -type f -name '*.so*' -exec ls -al {} + -exec chgrp {{ rhel9stig_stigrule_257921_chgrp_acct }} {} + || true
   register: chgrp_library_cmds
   changed_when: chgrp_library_cmds.stdout | length > 0
   when: rhel9stig_stigrule_257921_Manage
@@ -1647,7 +1647,7 @@
 - name: stigrule_257922__chown_library_dirs
   ansible.builtin.shell: |
     set -o pipefail
-    find {{ rhel9stig_stigrule_257922_bin_paths | join(' ') }} {{ exclude_chown_dir_library_cmd }} -type d ! -user root -exec ls -al {} + -exec chown root {} + || true
+    find {{ rhel9stig_stigrule_257922_library_paths | join(' ') }} {{ exclude_chown_dir_library_cmd }} -type d ! -user root -exec ls -al {} + -exec chown root {} + || true
   register: chown_dir_library_cmds
   changed_when: chown_dir_library_cmds.stdout | length > 0
   when: rhel9stig_stigrule_257922_Manage
@@ -1949,7 +1949,7 @@
 
 - name: Get detailed default zone info
   ansible.posix.firewalld_info:
-    zones: "{{ default_zone }}"
+    zones: "{{ firewalld_default_zone }}"
   register: zone_details
   when:
     - rhel9stig_stigrule_257937_Manage
