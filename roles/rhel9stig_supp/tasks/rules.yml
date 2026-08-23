@@ -828,6 +828,21 @@
     - rhel9stig_stigrule_257822_Manage
     - repo_sections is defined
 
+# --- Faster alternative for stigrule_257822_set_gpgcheck: one remote script
+# --- instead of a 645-iteration ini_file loop (measured on rhel9.edentree.home,
+# --- whose redhat.repo has 645 sections). To test: comment out the 5 tasks
+# --- above (Find repo files / Read repo files / Define regex filter for repo
+# --- names / Build repo section map / stigrule_257822_set_gpgcheck) and
+# --- uncomment the task below. Uses roles/rhel9stig_supp/files/set_repo_gpgcheck.py.
+#
+# - name: stigrule_257822_set_gpgcheck
+#   ansible.builtin.script:
+#     cmd: "set_repo_gpgcheck.py {{ rhel9stig_stigrule_257822_gpgcheck }}"
+#   register: set_gpgcheck_result
+#   changed_when: set_gpgcheck_result.stdout is search('^CHANGED:')
+#   when:
+#     - rhel9stig_stigrule_257822_Manage
+
 # R-257826 RHEL-09-215015
 - name: stigrule_257826_remove_vsftpd
   ansible.builtin.package:
@@ -2616,6 +2631,7 @@
         done;
       };
       dconf_needs_update || true
+  register: dconf_db_check
   notify: dconf_update
   changed_when: false
   when:
@@ -2671,6 +2687,12 @@
         dconf_restart_button_lock.changed
 
 # R-258038 RHEL-09-291030
+- name: stigrule_258038__ensure_usbguard_present
+  ansible.builtin.dnf:
+    name: usbguard
+    state: present
+  when: rhel9stig_stigrule_258038_Manage
+
 - name: Generate rules based on current connected USB devices
   ansible.builtin.command:
     cmd: usbguard generate-policy
