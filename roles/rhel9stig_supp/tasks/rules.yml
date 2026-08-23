@@ -3475,6 +3475,58 @@
     - rhel9stig_stigrule_258120_Manage
     - blank_password_accounts.stdout_lines | default([]) | length > 0
 
+# sssd refuses to start at all with zero enabled domains (exit
+# 4/NOPERMISSION, "No domain is enabled") - true on any host that has the
+# sssd package installed but was never joined to a directory service. The
+# rules below configure a minimal files-backed local domain so sssd has
+# something valid to load, letting the sssd_restart handler (notified by
+# R-258123 below) actually succeed instead of failing every run.
+- name: Check if sssd.conf exists
+  ansible.builtin.stat:
+    path: /etc/sssd/sssd.conf
+  register: sssd_conf_stat
+
+- name: Check for an existing sssd domain definition
+  ansible.builtin.command:
+    cmd: grep -E '^\s*domains\s*=\s*\S+' /etc/sssd/sssd.conf
+  register: sssd_domains_check
+  changed_when: false
+  failed_when: false
+  when: sssd_conf_stat.stat.exists
+
+- name: Set fact for whether a local domain needs to be created
+  ansible.builtin.set_fact:
+    sssd_needs_local_domain: "{{ (not sssd_conf_stat.stat.exists) or (sssd_domains_check.rc | default(1) != 0) }}"
+
+- name: Ensure [sssd] domains includes local (only when no domain defined)
+  community.general.ini_file:
+    path: /etc/sssd/sssd.conf
+    section: sssd
+    option: domains
+    value: local
+    owner: root
+    group: root
+    mode: '0600'
+    backup: true
+  when: sssd_needs_local_domain
+  notify: sssd_restart
+
+- name: Ensure [domain/local] section defines a files-backed local domain
+  community.general.ini_file:
+    path: /etc/sssd/sssd.conf
+    section: domain/local
+    option: "{{ item.key }}"
+    value: "{{ item.value }}"
+    owner: root
+    group: root
+    mode: '0600'
+    backup: true
+  loop:
+    - { key: id_provider, value: files }
+    - { key: description, value: "Local-only domain (no external identity source)" }
+  when: sssd_needs_local_domain
+  notify: sssd_restart
+
 # R-258123 RHEL-09-611170
 - name: stigrule_258123__create_sssd_conf_d_directory
   ansible.builtin.file:
