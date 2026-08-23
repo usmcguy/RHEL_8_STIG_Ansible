@@ -1972,7 +1972,7 @@
   register: create_firewall_zone
   when:
     - rhel9stig_stigrule_257937_Manage
-    - rhel9stig_stigrule_257937_zone not in builtin_zones
+    - rhel9stig_stigrule_257937_zone not in builtin_zones.stdout_lines
 
 - name: stigrule_257937__set_zone_shortname
   ansible.builtin.lineinfile:
@@ -1984,7 +1984,7 @@
   register: firewall_zone_shortname
   when:
     - rhel9stig_stigrule_257937_Manage
-    - rhel9stig_stigrule_257937_zone not in builtin_zones
+    - rhel9stig_stigrule_257937_zone not in builtin_zones.stdout_lines
 
 - name: stigrule_257937__set_zone_description
   ansible.builtin.lineinfile:
@@ -1996,7 +1996,7 @@
   register: firewall_zone_desc
   when:
     - rhel9stig_stigrule_257937_Manage
-    - rhel9stig_stigrule_257937_zone not in builtin_zones
+    - rhel9stig_stigrule_257937_zone not in builtin_zones.stdout_lines
 
 - name: Reload firewall rules
   ansible.builtin.command:
@@ -2343,8 +2343,48 @@
     - rhel9stig_stigrule_258230_Manage
     - not fips_enabled
 
+# FIPS mode disables non-FIPS-approved SSH host key algorithms (e.g. ed25519),
+# so sshd presents a different host key set after the reboot below. Without
+# this, the reboot handler's post-reboot reconnect fails with a "REMOTE HOST
+# IDENTIFICATION HAS CHANGED" error even though nothing malicious happened.
+- name: Remove stale local SSH host key before FIPS-mode reboot
+  ansible.builtin.command:
+    cmd: ssh-keygen -R {{ ansible_host | default(inventory_hostname) }}
+  delegate_to: localhost
+  become: false
+  changed_when: false
+  when:
+    - rhel9stig_stigrule_258230_Manage
+    - rhel9stig_allow_system_reboot
+    - fips_mode_setup.changed | default(false)
+
+- name: Save original SSH host key checking setting
+  ansible.builtin.set_fact:
+    rhel9stig_original_ssh_extra_args: "{{ ansible_ssh_extra_args | default('') }}"
+  when:
+    - rhel9stig_stigrule_258230_Manage
+    - rhel9stig_allow_system_reboot
+    - fips_mode_setup.changed | default(false)
+
+- name: Temporarily accept the new SSH host key after FIPS-mode reboot
+  ansible.builtin.set_fact:
+    ansible_ssh_extra_args: "{{ (ansible_ssh_extra_args | default('')) ~ ' -o StrictHostKeyChecking=accept-new' }}"
+  when:
+    - rhel9stig_stigrule_258230_Manage
+    - rhel9stig_allow_system_reboot
+    - fips_mode_setup.changed | default(false)
+
 - name: Run pending handlers
   ansible.builtin.meta: flush_handlers
+
+- name: Restore original SSH host key checking setting
+  ansible.builtin.set_fact:
+    ansible_ssh_extra_args: "{{ rhel9stig_original_ssh_extra_args }}"
+  when:
+    - rhel9stig_stigrule_258230_Manage
+    - rhel9stig_allow_system_reboot
+    - fips_mode_setup.changed | default(false)
+    - rhel9stig_original_ssh_extra_args is defined
 
 - name: stigrule_258230__report_fips_requires_reinstall
   ansible.builtin.debug:
