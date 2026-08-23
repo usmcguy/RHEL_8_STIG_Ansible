@@ -2670,7 +2670,7 @@
     owner: root
     group: root
     mode: '0644'
-  notify: dconf_restart_button_lock
+  register: dconf_restart_button_lock
   when:
     - rhel9stig_stigrule_258029_Manage
     - gui_installed
