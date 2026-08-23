@@ -6,12 +6,12 @@
 #   register: fstab_part_entry
 #   changed_when: false
 
-- name: "Stat {{ disk_partition }} for separate-partition check"
+- name: "Stat {{ disk_partition }} for separate-partition check" # noqa: name[template]
   ansible.builtin.stat:
     path: "{{ disk_partition }}"
   register: partition_option_target_stat
 
-- name: "Stat parent of {{ disk_partition }} for separate-partition check"
+- name: "Stat parent of {{ disk_partition }} for separate-partition check" # noqa: name[template]
   ansible.builtin.stat:
     path: "{{ disk_partition | dirname }}"
   register: partition_option_parent_stat
