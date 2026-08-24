@@ -179,6 +179,18 @@
     enabled: true
   when:
     - rhel9stig_stigrule_257782_Manage
+    - not fips_enabled
+
+- name: stigrule_257782__report_rngd_not_applicable_under_fips
+  ansible.builtin.debug:
+    msg: >-
+      RHEL-09-211035 (rngd active) is Not Applicable per the STIG check text
+      when kernel FIPS mode is enabled. rngd's systemd unit itself refuses to
+      start under FIPS mode (ConditionResult=no), which is expected here, not
+      a failure to remediate.
+  when:
+    - rhel9stig_stigrule_257782_Manage
+    - fips_enabled
 
 # R-257787 RHEL-09-212010
 - name: Check for BIOS grub2_password
@@ -1482,6 +1494,38 @@
     - crontabs_perms.stdout | length > 0
 
 # R-257889 RHEL-09-232045
+# /root's dotfiles are managed by /usr/lib/tmpfiles.d/rootfiles.conf ("C"
+# lines declaring mode 644), which systemd-tmpfiles-setup.service reapplies
+# on every boot - silently undoing this chmod after any later reboot in the
+# same run (or a future one). Overriding it with a same-named file under
+# /etc/tmpfiles.d/ (which always wins over /usr/lib/tmpfiles.d/) fixes the
+# actual source instead of just the symptom, and survives `rootfiles`
+# package reinstalls too.
+- name: Override rootfiles.conf tmpfiles.d permissions to survive reboots
+  ansible.builtin.copy:
+    dest: /etc/tmpfiles.d/rootfiles.conf
+    content: |
+      # Managed by usmcguy.stigs - overrides /usr/lib/tmpfiles.d/rootfiles.conf
+      # so /root's dotfiles stay at RHEL-09-232045's required 0740-or-less
+      # mode across reboots, instead of being reset to the package default
+      # of 644 by systemd-tmpfiles-setup.service on every boot.
+      C /root/.bash_logout   640 root root - /usr/share/rootfiles/.bash_logout
+      C /root/.bash_profile  640 root root - /usr/share/rootfiles/.bash_profile
+      C /root/.bashrc        640 root root - /usr/share/rootfiles/.bashrc
+      C /root/.cshrc         640 root root - /usr/share/rootfiles/.cshrc
+      C /root/.tcshrc        640 root root - /usr/share/rootfiles/.tcshrc
+    owner: root
+    group: root
+    mode: '0644'
+  register: rootfiles_tmpfiles_override
+  when: rhel9stig_stigrule_257889_Manage
+
+- name: Apply the rootfiles.conf tmpfiles.d override immediately
+  ansible.builtin.command: systemd-tmpfiles --create /etc/tmpfiles.d/rootfiles.conf
+  when:
+    - rhel9stig_stigrule_257889_Manage
+    - rootfiles_tmpfiles_override.changed
+
 - name: stigrule_257889__chmod_init_files
   ansible.builtin.shell:
     cmd: |
@@ -4008,7 +4052,7 @@
         | default('', true) }}
     aide_database_line: >-
       {{ aide_conf_text
-        | regex_search('^[ \\t]*database=file:.*$', multiline=True)
+        | regex_search('^[ \\t]*database_in=file:.*$', multiline=True)
         | default('', true) }}
     aide_database_out_line: >-
       {{ aide_conf_text
@@ -4025,7 +4069,7 @@
         | regex_replace('[ \\t#].*$', '') }}
     aide_database: >-
       {{ aide_database_line
-        | regex_replace('^[ \\t]*database=file:', '')
+        | regex_replace('^[ \\t]*database_in=file:', '')
         | regex_replace('[ \\t#].*$', '') }}
     aide_database_out: >-
       {{ aide_database_out_line
