@@ -2469,7 +2469,7 @@
   changed_when: crypto_policies_ciphers_reinstall.rc == 0
   when:
     - rhel9stig_stigrule_257989_Manage
-    - (opensshserver_ciphers_check.stdout.split(",") | sort) != (rhel9stig_stigrule_257989_approved_ciphers | sort)
+    - opensshserver_ciphers_check.stdout != (rhel9stig_stigrule_257989_approved_ciphers | join(","))
 
 - name: stigrule_257989__set_fips_stig_crypto_policy
   ansible.builtin.command: "update-crypto-policies --set {{ rhel9stig_stigrule_crypto_policy }}"
@@ -2501,7 +2501,7 @@
   changed_when: crypto_policies_macs_reinstall.rc == 0
   when:
     - rhel9stig_stigrule_257991_Manage
-    - (opensshserver_macs_check.stdout.split(",") | sort) != (rhel9stig_stigrule_257991_approved_macs | sort)
+    - opensshserver_macs_check.stdout != (rhel9stig_stigrule_257991_approved_macs | join(","))
 
 - name: stigrule_257991__set_fips_stig_crypto_policy
   ansible.builtin.command: "update-crypto-policies --set {{ rhel9stig_stigrule_crypto_policy }}"
@@ -4677,7 +4677,7 @@
   changed_when: crypto_policies_ciphers_reinstall.rc == 0
   when:
     - rhel9stig_stigrule_270177_Manage
-    - (openssh_ciphers_check.stdout.split(",") | sort) != (rhel9stig_stigrule_270177_approved_ciphers | sort)
+    - openssh_ciphers_check.stdout != (rhel9stig_stigrule_270177_approved_ciphers | join(","))
 
 - name: stigrule_270177__set_fips_stig_crypto_policy
   ansible.builtin.command: "update-crypto-policies --set {{ rhel9stig_stigrule_crypto_policy }}"
@@ -4709,7 +4709,7 @@
   changed_when: crypto_policies_macs_reinstall.rc == 0
   when:
     - rhel9stig_stigrule_270178_Manage
-    - (openssh_macs_check.stdout.split(",") | sort) != (rhel9stig_stigrule_270178_approved_macs | sort)
+    - openssh_macs_check.stdout != (rhel9stig_stigrule_270178_approved_macs | join(","))
 
 - name: stigrule_270178__set_fips_stig_crypto_policy
   ansible.builtin.command: "update-crypto-policies --set {{ rhel9stig_stigrule_crypto_policy }}"
