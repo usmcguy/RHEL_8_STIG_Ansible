@@ -31,6 +31,21 @@ isn't obvious from reading the code once, and has already caused real time loss.
   the real end-to-end test, run against `rhel9.edentree.home` for RHEL 9 STIGs
   and `rhel-8.edentree.home` for RHEL 8 STIGS (see `inventory.ini`). There is no 
   molecule/unit test harness in this repo — verification is always live-host.
+- **`--ask-become-pass` isn't actually required** if your local `ssh-agent` has
+  the right key loaded (check with `ssh-add -l`). The target host has
+  `pam_ssh_agent_auth` configured so `sudo` authenticates against a forwarded
+  agent key instead of a Unix password — that's what `inventory.ini`'s
+  `ansible_ssh_extra_args="-o ForwardAgent=yes"` and
+  `ansible_become_flags="... --preserve-env=SSH_AUTH_SOCK"` are for. `test.sh`
+  relies on exactly this (it has no `--ask-become-pass` and isn't run with a
+  password prompt). A plain `ssh dave@rhel9.edentree.home` without `-A` will
+  make `sudo` demand a password and fail non-interactively (`sudo: a password
+  is required`) — the agent forwarding is the part that's easy to forget when
+  testing `sudo`/`become` manually outside of Ansible, e.g.:
+  `ssh -A dave@rhel9.edentree.home "sudo --preserve-env=SSH_AUTH_SOCK <cmd>"`.
+  Running `ansible-playbook` directly (no wrapper) picks this up automatically
+  from `inventory.ini` as long as the invoking shell's own `ssh-agent` holds
+  the key — no password needs to be typed or stored anywhere.
 - Always run `--syntax-check` before a live run. It catches YAML/module
   resolution issues but **not**: undefined Jinja vars evaluated only under a
   specific `when:`, handler-name typos (`notify:` to a nonexistent handler
