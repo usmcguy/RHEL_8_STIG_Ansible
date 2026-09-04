@@ -175,3 +175,70 @@ releases:
     - rhel9-stig-fixes.yml
     - rhel9.yml
     release_date: '2026-08-22'
+  1.1.1:
+    changes:
+      bugfixes:
+      - rhel8stig_supp - fixed a ``notify`` handler name typo (``auth_select_apply``)
+        so it correctly matches the defined ``apply_authselect_changes`` handler for
+        the authselect profile change made by R-230332.
+      - rhel9stig_supp - R-257782 (rngd) no longer fails when kernel FIPS mode is
+        enabled; rngd's own systemd unit refuses to start under FIPS mode by design,
+        so this is now reported separately as not applicable instead of as a failure.
+      - rhel9stig_supp - R-258134 (AIDE database initialization) no longer relies
+        on matching AIDE's exact human-readable completion message, which changed
+        wording across AIDE versions and silently broke idempotency; ``changed_when``
+        now checks the command's return code instead.
+      - rhel9stig_supp - after enabling FIPS mode (R-258230), which reboots the host
+        and rotates its SSH host key, the role now temporarily relaxes strict host
+        key checking to auto-trust the new key and restores strict checking afterward,
+        instead of leaving the connection broken until the key is manually re-trusted.
+      - rhel9stig_supp - fixed an undefined variable (``default_zone``) in the firewall
+        zone lookup used by R-257937; it now correctly references ``firewalld_default_zone``.
+      - rhel9stig_supp - fixed the approved SSH cipher and MAC lists (R-257989, R-257991,
+        R-258241, R-270177, R-270178) being declared out of the STIG's required priority
+        order.
+      - rhel9stig_supp - removed the ``restart_aide`` handler and its ``notify``,
+        which referenced a non-existent ``aide`` systemd service; AIDE is cron-driven
+        and has no daemon to restart.
+      - rhel9stig_supp - separate-partition checks (partition_option.yml) no longer
+        use ``ansible_facts.mounts`` to detect whether a path is on its own filesystem,
+        since Ansible's fact gathering silently omits tmpfs-backed mounts such as
+        ``/tmp`` and ``/dev/shm``; the check now compares ``stat`` device IDs between
+        the path and its parent directory instead.
+      - rhel9stig_supp - sssd-related rules (R-258123 and neighboring rules) no longer
+        leave sssd unable to start on hosts where the package is installed but sssd
+        was never joined to a directory service; a minimal files-backed local domain
+        is now configured so sssd has a valid domain to load before its config is
+        otherwise managed.
+      - stig_xml_custom callback - a task that fails (without ``ignore_errors``) or
+        an unreachable host now correctly marks the corresponding rule as "fail";
+        previously only ``changed`` status was considered.
+      - stig_xml_custom callback - fix a rule being permanently marked "pass" when
+        an early helper task (e.g. a ``stat``/``slurp``/``set_fact`` sharing the rule's
+        ``stigrule_<id>`` prefix) reported ``changed=false`` before the real check/remediation
+        task ran; a rule is now only reported "pass" if no task under its id ever
+        reports a real change or an unhandled failure.
+      - stig_xml_custom callback - generate one XCCDF ``TestResult`` per managed host
+        instead of merging all hosts into a single result tree; multi-host runs now
+        write one output file per host (``<XML_PATH-base>-<hostname>.xml``) while
+        single-host runs keep the original ``XML_PATH`` filename unchanged.
+      minor_changes:
+      - added a task-hygiene check script (``scripts/check_task_hygiene.py``) to help
+        catch naming and structural issues in rule tasks.
+      - enabled SSH pipelining (``ansible.cfg``) to speed up playbook runs against
+        hosts without ``requiretty`` in ``sudoers``.
+      - rhel9stig_supp - added Molecule test scaffolding (``molecule/default/``) for
+        the role.
+      - rhel9stig_supp - added an opt-in, faster replacement script (``files/set_repo_gpgcheck.py``)
+        for R-257822's ``gpgcheck`` enforcement, which edits every section of every
+        ``/etc/yum.repos.d/*.repo`` file directly instead of issuing one ``community.general.ini_file``
+        call per section; staged commented out in ``rules.yml`` next to the existing
+        task.
+    fragments:
+    - callback-per-host-results-and-sticky-fail.yml
+    - repo-tooling-and-testing.yml
+    - rhel8-authselect-handler-name.yml
+    - rhel9-aide-and-partition-idempotency.yml
+    - rhel9-fips-and-ssh-crypto-fixes.yml
+    - rhel9-sssd-no-domain-fallback.yml
+    release_date: '2026-09-04'
