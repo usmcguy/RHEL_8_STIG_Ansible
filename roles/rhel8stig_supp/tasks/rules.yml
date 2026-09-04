@@ -2133,7 +2133,7 @@
   ansible.builtin.command: "authselect select {{ rhel8STIG_stigrule_authselect_profile }} {{ rhel8STIG_stigrule_authselect_features | join(' ') }} {{ '--force' if rhel8STIG_stigrule_authselect_force | bool else '' }}"
   register: rhel8STIG_230332_authselect_enable
   changed_when: "'Profile' in rhel8STIG_230332_authselect_enable.stdout"
-  notify: auth_select_apply
+  notify: apply_authselect_changes
   when:
     - rhel8STIG_stigrule_230332_Manage
     - ansible_distribution_version is version('8.2', '<')

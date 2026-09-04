@@ -1,0 +1,21 @@
+---
+# Deliberately small and representative rather than exhaustive - covers a
+# few rules already known to behave sanely in a container. Grow this
+# opportunistically whenever a rule gets touched for a bug fix anyway,
+# rather than trying to cover all ~150 rules up front.
+- name: Verify
+  hosts: all
+  become: false
+  gather_facts: false
+  tasks:
+    - name: Check /etc/dnf/dnf.conf has gpgcheck enabled (R-257822)
+      ansible.builtin.command: grep -E '^gpgcheck[[:space:]]*=[[:space:]]*1' /etc/dnf/dnf.conf
+      changed_when: false
+
+    - name: Check aide package is installed (R-258134)
+      ansible.builtin.command: rpm -q aide
+      changed_when: false
+
+    - name: Check usbguard package is installed (R-258038)
+      ansible.builtin.command: rpm -q usbguard
+      changed_when: false

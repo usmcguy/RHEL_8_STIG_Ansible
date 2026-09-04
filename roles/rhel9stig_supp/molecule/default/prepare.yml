@@ -1,0 +1,12 @@
+---
+- name: Prepare
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Ensure python3 is present for Ansible to use
+      ansible.builtin.raw: command -v python3 || (dnf install -y python3 || microdnf install -y python3)
+      changed_when: false
+
+    - name: Ensure authselect is present (minimal UBI image lacks it)
+      ansible.builtin.raw: rpm -q authselect || dnf install -y authselect
+      changed_when: false

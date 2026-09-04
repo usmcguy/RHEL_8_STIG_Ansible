@@ -100,6 +100,7 @@ rhel9stig_stigrule_257819_key_fingerprints:
 rhel9stig_stigrule_257819_src_key_path: roles/rhel9stig_supp/files/RPM-GPG-KEY-redhat-release
 # R-257822 RHEL-09-214025
 rhel9stig_stigrule_257822_Manage: true
+rhel9stig_stigrule_257822_gpgcheck: 1
 # R-257826 RHEL-09-215015
 rhel9stig_stigrule_257826_Manage: true
 # R-257835 RHEL-09-215060
@@ -364,16 +365,16 @@ rhel9stig_stigrule_257956_Manage: true
 rhel9stig_stigrule_257989_Manage: true
 rhel9stig_stigrule_257989_approved_ciphers:
   - aes256-gcm@openssh.com
-  - aes256-ctr
   - aes128-gcm@openssh.com
+  - aes256-ctr
   - aes128-ctr
 # R-257991 RHEL-09-255075
 rhel9stig_stigrule_257991_Manage: true
 rhel9stig_stigrule_257991_approved_macs:
-  - hmac-sha2-256-etm@openssh.com
   - hmac-sha2-512-etm@openssh.com
-  - hmac-sha2-256
+  - hmac-sha2-256-etm@openssh.com
   - hmac-sha2-512
+  - hmac-sha2-256
 # R-257999 RHEL-09-255115
 rhel9stig_stigrule_257999_Manage: true
 # R-258000 RHEL-09-255120
@@ -542,8 +543,8 @@ rhel9stig_stigrule_258236_Manage: true
 rhel9stig_stigrule_258241_Manage: true
 rhel9stig_stigrule_258241_ssh_ciphers:
   - AES-256-GCM
-  - AES-256-CTR
   - AES-128-GCM
+  - AES-256-CTR
   - AES-128-CTR
 rhel9stig_stigrule_258241_ssh_macs:
   - HMAC-SHA2-512
@@ -561,16 +562,16 @@ rhel9stig_stigrule_270176_Manage: true
 rhel9stig_stigrule_270177_Manage: true
 rhel9stig_stigrule_270177_approved_ciphers:
   - aes256-gcm@openssh.com
-  - aes256-ctr
   - aes128-gcm@openssh.com
+  - aes256-ctr
   - aes128-ctr
 # R-270178 RHEL-09-255070
 rhel9stig_stigrule_270178_Manage: true
 rhel9stig_stigrule_270178_approved_macs:
-  - hmac-sha2-256-etm@openssh.com
   - hmac-sha2-512-etm@openssh.com
-  - hmac-sha2-256
+  - hmac-sha2-256-etm@openssh.com
   - hmac-sha2-512
+  - hmac-sha2-256
 # R-270180 RHEL-09-433016
 rhel9stig_stigrule_270180_Manage: true
 rhel9stig_stigrule_270180_enforcing: false

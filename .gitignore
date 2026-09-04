@@ -14,3 +14,4 @@ id_rsa*
 inventory*
 site.yml
 .claude/worktrees/
+roles/rhel9stig_supp/files/__pycache__/

@@ -179,6 +179,18 @@
     enabled: true
   when:
     - rhel9stig_stigrule_257782_Manage
+    - not fips_enabled
+
+- name: stigrule_257782__report_rngd_not_applicable_under_fips
+  ansible.builtin.debug:
+    msg: >-
+      RHEL-09-211035 (rngd active) is Not Applicable per the STIG check text
+      when kernel FIPS mode is enabled. rngd's systemd unit itself refuses to
+      start under FIPS mode (ConditionResult=no), which is expected here, not
+      a failure to remediate.
+  when:
+    - rhel9stig_stigrule_257782_Manage
+    - fips_enabled
 
 # R-257787 RHEL-09-212010
 - name: Check for BIOS grub2_password
@@ -341,11 +353,11 @@
     - ansible_distribution_version is version('9.3', '>=')
 
 # R-257792 RHEL-09-212035
-- name: Check grub2-editenv for vsyscall
+- name: Check grubby for vsyscall
   ansible.builtin.shell:
     cmd: |
       set -o pipefail
-      grub2-editenv list | grep -E 'vsyscall(=|[[:space:]])'
+      grubby --info=ALL | grep args | grep -Ev '([^[:alnum:]])(vsyscall=none)([^[:alnum:]]|$)' || true
     executable: /bin/bash
   register: grub2_vsyscall_check
   changed_when: false
@@ -388,14 +400,14 @@
   notify: grub2_update
   when:
     - rhel9stig_stigrule_257792_Manage
-    - "'vsyscall=none' not in grub2_vsyscall_check.stdout"
+    - grub2_vsyscall_check.stdout | length > 0
 
 # R-257793 RHEL-09-212040
-- name: Check grub2-editenv for page_poison
+- name: Check grubby for page_poison
   ansible.builtin.shell:
     cmd: |
       set -o pipefail
-      grub2-editenv list | grep -E 'page_poison(=|[[:space:]])' || true
+      grubby --info=ALL | grep args | grep -Ev '([^[:alnum:]])(page_poison=1)([^[:alnum:]]|$)' || true
     executable: /bin/bash
   register: grub2_poison_check
   changed_when: false
@@ -440,14 +452,14 @@
   notify: grub2_update
   when:
     - rhel9stig_stigrule_257793_Manage
-    - "'page_poison=1' not in grub2_poison_check.stdout"
+    - grub2_poison_check.stdout | length > 0
 
 # V-257794 RHEL-09-212045
-- name: Check grub2-editenv for init_on_free
+- name: Check grubby for init_on_free
   ansible.builtin.shell:
     cmd: |
       set -o pipefail
-      grub2-editenv list | grep -E 'init_on_free(=|[[:space:]])' || true
+      grubby --info=ALL | grep args | grep -Ev '([^[:alnum:]])(init_on_free=1)([^[:alnum:]]|$)' || true
     executable: /bin/bash
   register: grub2_init_check
   changed_when: false
@@ -491,14 +503,14 @@
   notify: grub2_update
   when:
     - rhel9stig_stigrule_257794_Manage
-    - "'init_on_free=1' not in grub2_init_check.stdout"
+    - grub2_init_check.stdout | length > 0
 
 # V-257795 RHEL-09-212050
-- name: Check grub2-editenv for pti
+- name: Check grubby for pti
   ansible.builtin.shell:
     cmd: |
       set -o pipefail
-      grub2-editenv list | grep -E 'pti(=|[[:space:]])' || true
+      grubby --info=ALL | grep args | grep -Ev '([^[:alnum:]])(pti=on)([^[:alnum:]]|$)' || true
     executable: /bin/bash
   register: grub2_pti_check
   changed_when: false
@@ -542,14 +554,14 @@
   notify: grub2_update
   when:
     - rhel9stig_stigrule_257795_Manage
-    - "'pti=on' not in grub2_pti_check.stdout"
+    - grub2_pti_check.stdout | length > 0
 
 # V-257796 RHEL-09-212055
-- name: Check grub2-editenv for audit
+- name: Check grubby for audit
   ansible.builtin.shell:
     cmd: |
       set -o pipefail
-      grub2-editenv list | grep -E 'audit(=|[[:space:]])' || true
+      grubby --info=ALL | grep args | grep -Ev '([^[:alnum:]])(audit=1)([^[:alnum:]]|$)' || true
     executable: /bin/bash
   register: grub2_audit_check
   changed_when: false
@@ -593,7 +605,7 @@
   notify: grub2_update
   when:
     - rhel9stig_stigrule_257796_Manage
-    - "'audit=1' not in grub2_audit_check.stdout"
+    - grub2_audit_check.stdout | length > 0
 
 # R-257817 RHEL-09-213110
 - name: Check cpu info for 'nx' flag
@@ -686,7 +698,7 @@
 - name: stigrule_257817_validate_fingerprints_present
   ansible.builtin.assert:
     that:
-      - item.fingerprint in validate_rpm_gpg_fingerprint.stdout
+      - item.fingerprint in (validate_rpm_gpg_fingerprint.stdout | default(rpm_gpg_fingerprint.stdout))
     fail_msg: "Fingerprint '{{ item.name }}' not found in key output"
     success_msg: "'{{ item.name }}' fingerprint verified"
   loop: "{{ rhel9stig_stigrule_257819_key_fingerprints }}"
@@ -827,6 +839,21 @@
   when:
     - rhel9stig_stigrule_257822_Manage
     - repo_sections is defined
+
+# --- Faster alternative for stigrule_257822_set_gpgcheck: one remote script
+# --- instead of a 645-iteration ini_file loop (measured on rhel9.edentree.home,
+# --- whose redhat.repo has 645 sections). To test: comment out the 5 tasks
+# --- above (Find repo files / Read repo files / Define regex filter for repo
+# --- names / Build repo section map / stigrule_257822_set_gpgcheck) and
+# --- uncomment the task below. Uses roles/rhel9stig_supp/files/set_repo_gpgcheck.py.
+#
+# - name: stigrule_257822_set_gpgcheck
+#   ansible.builtin.script:
+#     cmd: "set_repo_gpgcheck.py {{ rhel9stig_stigrule_257822_gpgcheck }}"
+#   register: set_gpgcheck_result
+#   changed_when: set_gpgcheck_result.stdout is search('^CHANGED:')
+#   when:
+#     - rhel9stig_stigrule_257822_Manage
 
 # R-257826 RHEL-09-215015
 - name: stigrule_257826_remove_vsftpd
@@ -1467,6 +1494,38 @@
     - crontabs_perms.stdout | length > 0
 
 # R-257889 RHEL-09-232045
+# /root's dotfiles are managed by /usr/lib/tmpfiles.d/rootfiles.conf ("C"
+# lines declaring mode 644), which systemd-tmpfiles-setup.service reapplies
+# on every boot - silently undoing this chmod after any later reboot in the
+# same run (or a future one). Overriding it with a same-named file under
+# /etc/tmpfiles.d/ (which always wins over /usr/lib/tmpfiles.d/) fixes the
+# actual source instead of just the symptom, and survives `rootfiles`
+# package reinstalls too.
+- name: Override rootfiles.conf tmpfiles.d permissions to survive reboots
+  ansible.builtin.copy:
+    dest: /etc/tmpfiles.d/rootfiles.conf
+    content: |
+      # Managed by usmcguy.stigs - overrides /usr/lib/tmpfiles.d/rootfiles.conf
+      # so /root's dotfiles stay at RHEL-09-232045's required 0740-or-less
+      # mode across reboots, instead of being reset to the package default
+      # of 644 by systemd-tmpfiles-setup.service on every boot.
+      C /root/.bash_logout   640 root root - /usr/share/rootfiles/.bash_logout
+      C /root/.bash_profile  640 root root - /usr/share/rootfiles/.bash_profile
+      C /root/.bashrc        640 root root - /usr/share/rootfiles/.bashrc
+      C /root/.cshrc         640 root root - /usr/share/rootfiles/.cshrc
+      C /root/.tcshrc        640 root root - /usr/share/rootfiles/.tcshrc
+    owner: root
+    group: root
+    mode: '0644'
+  register: rootfiles_tmpfiles_override
+  when: rhel9stig_stigrule_257889_Manage
+
+- name: Apply the rootfiles.conf tmpfiles.d override immediately
+  ansible.builtin.command: systemd-tmpfiles --create /etc/tmpfiles.d/rootfiles.conf
+  when:
+    - rhel9stig_stigrule_257889_Manage
+    - rootfiles_tmpfiles_override.changed
+
 - name: stigrule_257889__chmod_init_files
   ansible.builtin.shell:
     cmd: |
@@ -1581,7 +1640,7 @@
 - name: stigrule_257920__chown_library_files
   ansible.builtin.shell: |
     set -o pipefail
-    find {{ rhel9stig_stigrule_257920_bin_paths | join(' ') }} {{ exclude_chown_library_cmd }} -type f -name '*.so*' ! -user root -exec ls -al {} + -exec chown root {} + || true
+    find {{ rhel9stig_stigrule_257920_library_paths | join(' ') }} {{ exclude_chown_library_cmd }} -type f -name '*.so*' ! -user root -exec ls -al {} + -exec chown root {} + || true
   register: chown_library_cmds
   changed_when: chown_library_cmds.stdout | length > 0
   when: rhel9stig_stigrule_257920_Manage
@@ -1614,7 +1673,7 @@
 - name: stigrule_257921__chgrp_library_files
   ansible.builtin.shell: |
     set -o pipefail
-    find {{ rhel9stig_stigrule_257921_bin_paths | join(' ') }} {{ exclude_chgrp_library_cmd }} -gid +{{ sys_gid_max }} -type f -name '*.so*' -exec ls -al {} + -exec chgrp {{ rhel9stig_stigrule_257921_chgrp_acct }} {} + || true
+    find {{ rhel9stig_stigrule_257921_library_paths | join(' ') }} {{ exclude_chgrp_library_cmd }} -gid +{{ sys_gid_max }} -type f -name '*.so*' -exec ls -al {} + -exec chgrp {{ rhel9stig_stigrule_257921_chgrp_acct }} {} + || true
   register: chgrp_library_cmds
   changed_when: chgrp_library_cmds.stdout | length > 0
   when: rhel9stig_stigrule_257921_Manage
@@ -1647,7 +1706,7 @@
 - name: stigrule_257922__chown_library_dirs
   ansible.builtin.shell: |
     set -o pipefail
-    find {{ rhel9stig_stigrule_257922_bin_paths | join(' ') }} {{ exclude_chown_dir_library_cmd }} -type d ! -user root -exec ls -al {} + -exec chown root {} + || true
+    find {{ rhel9stig_stigrule_257922_library_paths | join(' ') }} {{ exclude_chown_dir_library_cmd }} -type d ! -user root -exec ls -al {} + -exec chown root {} + || true
   register: chown_dir_library_cmds
   changed_when: chown_dir_library_cmds.stdout | length > 0
   when: rhel9stig_stigrule_257922_Manage
@@ -1949,7 +2008,7 @@
 
 - name: Get detailed default zone info
   ansible.posix.firewalld_info:
-    zones: "{{ default_zone }}"
+    zones: "{{ firewalld_default_zone }}"
   register: zone_details
   when:
     - rhel9stig_stigrule_257937_Manage
@@ -1972,7 +2031,7 @@
   register: create_firewall_zone
   when:
     - rhel9stig_stigrule_257937_Manage
-    - rhel9stig_stigrule_257937_zone not in builtin_zones
+    - rhel9stig_stigrule_257937_zone not in builtin_zones.stdout_lines
 
 - name: stigrule_257937__set_zone_shortname
   ansible.builtin.lineinfile:
@@ -1984,7 +2043,7 @@
   register: firewall_zone_shortname
   when:
     - rhel9stig_stigrule_257937_Manage
-    - rhel9stig_stigrule_257937_zone not in builtin_zones
+    - rhel9stig_stigrule_257937_zone not in builtin_zones.stdout_lines
 
 - name: stigrule_257937__set_zone_description
   ansible.builtin.lineinfile:
@@ -1996,7 +2055,7 @@
   register: firewall_zone_desc
   when:
     - rhel9stig_stigrule_257937_Manage
-    - rhel9stig_stigrule_257937_zone not in builtin_zones
+    - rhel9stig_stigrule_257937_zone not in builtin_zones.stdout_lines
 
 - name: Reload firewall rules
   ansible.builtin.command:
@@ -2343,8 +2402,48 @@
     - rhel9stig_stigrule_258230_Manage
     - not fips_enabled
 
+# FIPS mode disables non-FIPS-approved SSH host key algorithms (e.g. ed25519),
+# so sshd presents a different host key set after the reboot below. Without
+# this, the reboot handler's post-reboot reconnect fails with a "REMOTE HOST
+# IDENTIFICATION HAS CHANGED" error even though nothing malicious happened.
+- name: Remove stale local SSH host key before FIPS-mode reboot
+  ansible.builtin.command:
+    cmd: ssh-keygen -R {{ ansible_host | default(inventory_hostname) }}
+  delegate_to: localhost
+  become: false
+  changed_when: false
+  when:
+    - rhel9stig_stigrule_258230_Manage
+    - rhel9stig_allow_system_reboot
+    - fips_mode_setup.changed | default(false)
+
+- name: Save original SSH host key checking setting
+  ansible.builtin.set_fact:
+    rhel9stig_original_ssh_extra_args: "{{ ansible_ssh_extra_args | default('') }}"
+  when:
+    - rhel9stig_stigrule_258230_Manage
+    - rhel9stig_allow_system_reboot
+    - fips_mode_setup.changed | default(false)
+
+- name: Temporarily accept the new SSH host key after FIPS-mode reboot
+  ansible.builtin.set_fact:
+    ansible_ssh_extra_args: "{{ (ansible_ssh_extra_args | default('')) ~ ' -o StrictHostKeyChecking=accept-new' }}"
+  when:
+    - rhel9stig_stigrule_258230_Manage
+    - rhel9stig_allow_system_reboot
+    - fips_mode_setup.changed | default(false)
+
 - name: Run pending handlers
   ansible.builtin.meta: flush_handlers
+
+- name: Restore original SSH host key checking setting
+  ansible.builtin.set_fact:
+    ansible_ssh_extra_args: "{{ rhel9stig_original_ssh_extra_args }}"
+  when:
+    - rhel9stig_stigrule_258230_Manage
+    - rhel9stig_allow_system_reboot
+    - fips_mode_setup.changed | default(false)
+    - rhel9stig_original_ssh_extra_args is defined
 
 - name: stigrule_258230__report_fips_requires_reinstall
   ansible.builtin.debug:
@@ -2411,22 +2510,10 @@
 - name: stigrule_257989__reinstall_crypto_policies
   ansible.builtin.command: dnf -y reinstall crypto-policies
   register: crypto_policies_ciphers_reinstall
-  changed_when: "'Nothing to do' not in crypto_policies_ciphers_reinstall.stdout"
+  changed_when: crypto_policies_ciphers_reinstall.rc == 0
   when:
     - rhel9stig_stigrule_257989_Manage
     - opensshserver_ciphers_check.stdout != (rhel9stig_stigrule_257989_approved_ciphers | join(","))
-
-- name: stigrule_257989__update_opensshserver_approved_ciphers
-  ansible.builtin.replace:
-    path: "{{ item }}"
-    regexp: "^(Ciphers[[:space:]]+).*"
-    replace: '\1{{ rhel9stig_stigrule_257989_approved_ciphers | join(",") }}'
-  loop:
-    - /usr/share/crypto-policies/FIPS/opensshserver.txt
-    - /usr/share/crypto-policies/back-ends/FIPS/opensshserver.config
-    - /etc/crypto-policies/back-ends/opensshserver.config
-  register: usr_share_update_ciphers
-  when: rhel9stig_stigrule_257989_Manage
 
 - name: stigrule_257989__set_fips_stig_crypto_policy
   ansible.builtin.command: "update-crypto-policies --set {{ rhel9stig_stigrule_crypto_policy }}"
@@ -2435,9 +2522,7 @@
   notify: reboot
   when:
     - rhel9stig_stigrule_257989_Manage
-    - >
-      crypto_policies_ciphers_reinstall.changed or
-      usr_share_update_ciphers.changed
+    - crypto_policies_ciphers_reinstall is changed
 
 - name: Run pending handlers
   ansible.builtin.meta: flush_handlers
@@ -2457,22 +2542,10 @@
 - name: stigrule_257991__reinstall_crypto_policies
   ansible.builtin.command: dnf -y reinstall crypto-policies
   register: crypto_policies_macs_reinstall
-  changed_when: "'Nothing to do' not in crypto_policies_macs_reinstall.stdout"
+  changed_when: crypto_policies_macs_reinstall.rc == 0
   when:
     - rhel9stig_stigrule_257991_Manage
     - opensshserver_macs_check.stdout != (rhel9stig_stigrule_257991_approved_macs | join(","))
-
-- name: stigrule_257991__update_opensshserver_approved_macs
-  ansible.builtin.replace:
-    path: "{{ item }}"
-    regexp: "^(MACs[[:space:]]+).*"
-    replace: '\1{{ rhel9stig_stigrule_257991_approved_macs | join(",") }}'
-  loop:
-    - /usr/share/crypto-policies/FIPS/opensshserver.txt
-    - /usr/share/crypto-policies/back-ends/FIPS/opensshserver.config
-    - /etc/crypto-policies/back-ends/opensshserver.config
-  register: usr_share_update_macs
-  when: rhel9stig_stigrule_257991_Manage
 
 - name: stigrule_257991__set_fips_stig_crypto_policy
   ansible.builtin.command: "update-crypto-policies --set {{ rhel9stig_stigrule_crypto_policy }}"
@@ -2481,9 +2554,7 @@
   notify: reboot
   when:
     - rhel9stig_stigrule_257991_Manage
-    - >
-      crypto_policies_macs_reinstall.changed or
-      usr_share_update_macs.changed
+    - crypto_policies_macs_reinstall is changed
 
 - name: Run pending handlers
   ansible.builtin.meta: flush_handlers
@@ -2576,6 +2647,7 @@
         done;
       };
       dconf_needs_update || true
+  register: dconf_db_check
   notify: dconf_update
   changed_when: false
   when:
@@ -2614,7 +2686,7 @@
     owner: root
     group: root
     mode: '0644'
-  notify: dconf_restart_button_lock
+  register: dconf_restart_button_lock
   when:
     - rhel9stig_stigrule_258029_Manage
     - gui_installed
@@ -2631,6 +2703,12 @@
         dconf_restart_button_lock.changed
 
 # R-258038 RHEL-09-291030
+- name: stigrule_258038__ensure_usbguard_present
+  ansible.builtin.dnf:
+    name: usbguard
+    state: present
+  when: rhel9stig_stigrule_258038_Manage
+
 - name: Generate rules based on current connected USB devices
   ansible.builtin.command:
     cmd: usbguard generate-policy
@@ -3413,6 +3491,58 @@
     - rhel9stig_stigrule_258120_Manage
     - blank_password_accounts.stdout_lines | default([]) | length > 0
 
+# sssd refuses to start at all with zero enabled domains (exit
+# 4/NOPERMISSION, "No domain is enabled") - true on any host that has the
+# sssd package installed but was never joined to a directory service. The
+# rules below configure a minimal files-backed local domain so sssd has
+# something valid to load, letting the sssd_restart handler (notified by
+# R-258123 below) actually succeed instead of failing every run.
+- name: Check if sssd.conf exists
+  ansible.builtin.stat:
+    path: /etc/sssd/sssd.conf
+  register: sssd_conf_stat
+
+- name: Check for an existing sssd domain definition
+  ansible.builtin.command:
+    cmd: grep -E '^\s*domains\s*=\s*\S+' /etc/sssd/sssd.conf
+  register: sssd_domains_check
+  changed_when: false
+  failed_when: false
+  when: sssd_conf_stat.stat.exists
+
+- name: Set fact for whether a local domain needs to be created
+  ansible.builtin.set_fact:
+    sssd_needs_local_domain: "{{ (not sssd_conf_stat.stat.exists) or (sssd_domains_check.rc | default(1) != 0) }}"
+
+- name: Ensure [sssd] domains includes local (only when no domain defined)
+  community.general.ini_file:
+    path: /etc/sssd/sssd.conf
+    section: sssd
+    option: domains
+    value: local
+    owner: root
+    group: root
+    mode: '0600'
+    backup: true
+  when: sssd_needs_local_domain
+  notify: sssd_restart
+
+- name: Ensure [domain/local] section defines a files-backed local domain
+  community.general.ini_file:
+    path: /etc/sssd/sssd.conf
+    section: domain/local
+    option: "{{ item.key }}"
+    value: "{{ item.value }}"
+    owner: root
+    group: root
+    mode: '0600'
+    backup: true
+  loop:
+    - { key: id_provider, value: files }
+    - { key: description, value: "Local-only domain (no external identity source)" }
+  when: sssd_needs_local_domain
+  notify: sssd_restart
+
 # R-258123 RHEL-09-611170
 - name: stigrule_258123__create_sssd_conf_d_directory
   ansible.builtin.file:
@@ -3420,7 +3550,7 @@
     state: directory
     owner: root
     group: root
-    mode: '0711'
+    mode: '0700'
   when:
     - rhel9stig_stigrule_258123_Manage
 
@@ -3430,6 +3560,9 @@
     section: sssd
     option: certificate_verification
     state: absent
+    mode: '0600'
+    owner: root
+    group: root
   when:
     - rhel9stig_stigrule_258123_Manage
 
@@ -3448,6 +3581,9 @@
     section: sssd
     option: certificate_verification
     state: absent
+    mode: '0600'
+    owner: root
+    group: root
   loop: "{{ sssd_conf_d_files.files | default([]) | rejectattr('path', 'equalto', '/etc/sssd/conf.d/certificate_verification.conf') | list }}"
   loop_control:
     label: "{{ item.path }}"
@@ -3597,14 +3733,14 @@
             'subject_line':
               'subject=C = ' ~ (item.subject.countryName | default('US'))
               ~ ', O = ' ~ (item.subject.organizationName | default('U.S. Government'))
-              ~ ', OU = ' ~ (item.subject_ordered.organizationalUnitName[0] | default('DoD'))
-              ~ ', OU = ' ~ (item.subject_ordered.organizationalUnitName[1] | default('PKI'))
+              ~ ', OU = ' ~ ((item.subject_ordered | selectattr('0', 'equalto', 'organizationalUnitName') | map(attribute='1') | list)[0] | default('DoD'))
+              ~ ', OU = ' ~ ((item.subject_ordered | selectattr('0', 'equalto', 'organizationalUnitName') | map(attribute='1') | list)[1] | default('PKI'))
               ~ ', CN = ' ~ item.subject.commonName,
             'issuer_line':
               'issuer=C = ' ~ (item.issuer.countryName | default('US'))
               ~ ', O = ' ~ (item.issuer.organizationName | default('U.S. Government'))
-              ~ ', OU = ' ~ (item.issuer_ordered.organizationalUnitName[0] | default('DoD'))
-              ~ ', OU = ' ~ (item.issuer_ordered.organizationalUnitName[1] | default('PKI'))
+              ~ ', OU = ' ~ ((item.issuer_ordered | selectattr('0', 'equalto', 'organizationalUnitName') | map(attribute='1') | list)[0] | default('DoD'))
+              ~ ', OU = ' ~ ((item.issuer_ordered | selectattr('0', 'equalto', 'organizationalUnitName') | map(attribute='1') | list)[1] | default('PKI'))
               ~ ', CN = ' ~ item.issuer.commonName,
             } ] }}
       loop: "{{ cleanup_ca_infos.results }}"
@@ -3618,7 +3754,7 @@
               (item.issuer.organizationName | default('') == 'U.S. Government')
               and
               (
-                item.issuer_ordered.organizationalUnitName | default([])
+                (item.issuer_ordered | selectattr('0', 'equalto', 'organizationalUnitName') | map(attribute='1') | list)
                 | select('search', 'DoD')
                 | list
                 | length > 0
@@ -3635,20 +3771,20 @@
             'subject_line':
               'subject=C = ' ~ (item.subject.countryName | default('US'))
               ~ ', O = ' ~ (item.subject.organizationName | default('U.S. Government'))
-              ~ ', OU = ' ~ (item.subject_ordered.organizationalUnitName[0] | default('DoD'))
-              ~ ', OU = ' ~ (item.subject_ordered.organizationalUnitName[1] | default('PKI'))
+              ~ ', OU = ' ~ ((item.subject_ordered | selectattr('0', 'equalto', 'organizationalUnitName') | map(attribute='1') | list)[0] | default('DoD'))
+              ~ ', OU = ' ~ ((item.subject_ordered | selectattr('0', 'equalto', 'organizationalUnitName') | map(attribute='1') | list)[1] | default('PKI'))
               ~ ', CN = ' ~ (item.subject.commonName | default('unknown')),
             'issuer_line':
               'issuer=C = ' ~ (item.issuer.countryName | default('US'))
               ~ ', O = ' ~ (item.issuer.organizationName | default('U.S. Government'))
-              ~ ', OU = ' ~ (item.issuer_ordered.organizationalUnitName[0] | default('DoD'))
-              ~ ', OU = ' ~ (item.issuer_ordered.organizationalUnitName[1] | default('PKI'))
+              ~ ', OU = ' ~ ((item.issuer_ordered | selectattr('0', 'equalto', 'organizationalUnitName') | map(attribute='1') | list)[0] | default('DoD'))
+              ~ ', OU = ' ~ ((item.issuer_ordered | selectattr('0', 'equalto', 'organizationalUnitName') | map(attribute='1') | list)[1] | default('PKI'))
               ~ ', CN = ' ~ (item.issuer.commonName | default('unknown')),
             'not_dod_issued': not (
                 (item.issuer.organizationName | default('') == 'U.S. Government')
                 and
                 (
-                  item.issuer_ordered.organizationalUnitName | default([])
+                  (item.issuer_ordered | selectattr('0', 'equalto', 'organizationalUnitName') | map(attribute='1') | list)
                   | select('search', 'DoD')
                   | list
                   | length > 0
@@ -3665,7 +3801,7 @@
           (item.issuer.organizationName | default('') == 'U.S. Government')
           and
           (
-            item.issuer_ordered.organizationalUnitName | default([])
+            (item.issuer_ordered | selectattr('0', 'equalto', 'organizationalUnitName') | map(attribute='1') | list)
             | select('search', 'DoD')
             | list
             | length > 0
@@ -3818,14 +3954,14 @@
         'subject_line':
         'subject=C = ' ~ (item.subject.countryName | default('US'))
         ~ ', O = ' ~ (item.subject.organizationName | default('U.S. Government'))
-        ~ ', OU = ' ~ (item.subject_ordered.organizationalUnitName[0] | default('DoD'))
-        ~ ', OU = ' ~ (item.subject_ordered.organizationalUnitName[1] | default('PKI'))
+        ~ ', OU = ' ~ ((item.subject_ordered | selectattr('0', 'equalto', 'organizationalUnitName') | map(attribute='1') | list)[0] | default('DoD'))
+        ~ ', OU = ' ~ ((item.subject_ordered | selectattr('0', 'equalto', 'organizationalUnitName') | map(attribute='1') | list)[1] | default('PKI'))
         ~ ', CN = ' ~ item.subject.commonName,
       'issuer_line':
         'issuer=C = ' ~ (item.issuer.countryName | default('US'))
         ~ ', O = ' ~ (item.issuer.organizationName | default('U.S. Government'))
-        ~ ', OU = ' ~ (item.issuer_ordered.organizationalUnitName[0] | default('DoD'))
-        ~ ', OU = ' ~ (item.issuer_ordered.organizationalUnitName[1] | default('PKI'))
+        ~ ', OU = ' ~ ((item.issuer_ordered | selectattr('0', 'equalto', 'organizationalUnitName') | map(attribute='1') | list)[0] | default('DoD'))
+        ~ ', OU = ' ~ ((item.issuer_ordered | selectattr('0', 'equalto', 'organizationalUnitName') | map(attribute='1') | list)[1] | default('PKI'))
         ~ ', CN = ' ~ item.issuer.commonName,
           } ] }}
   loop: "{{ dod_ca_infos.results }}"
@@ -3916,7 +4052,7 @@
         | default('', true) }}
     aide_database_line: >-
       {{ aide_conf_text
-        | regex_search('^[ \\t]*database=file:.*$', multiline=True)
+        | regex_search('^[ \\t]*database_in=file:.*$', multiline=True)
         | default('', true) }}
     aide_database_out_line: >-
       {{ aide_conf_text
@@ -3933,7 +4069,7 @@
         | regex_replace('[ \\t#].*$', '') }}
     aide_database: >-
       {{ aide_database_line
-        | regex_replace('^[ \\t]*database=file:', '')
+        | regex_replace('^[ \\t]*database_in=file:', '')
         | regex_replace('[ \\t#].*$', '') }}
     aide_database_out: >-
       {{ aide_database_out_line
@@ -3972,17 +4108,36 @@
     - rhel9stig_stigrule_258134_Manage
     - aide_db_stat.stat.exists
 
+- name: Report AIDE-detected filesystem differences for review
+  ansible.builtin.debug:
+    msg: >-
+      AIDE detected filesystem differences since the last baseline (rc={{ aide_check_output.rc }}).
+      Review /var/log/aide/aide.log (or the command output above) and re-run
+      '/usr/sbin/aide --init' manually to accept a new baseline if the changes are authorized.
+  when:
+    - rhel9stig_stigrule_258134_Manage
+    - aide_db_stat.stat.exists
+    - aide_check_output.rc != 0
+
 - name: stigrule_258134__aide_initialize
   ansible.builtin.command: /usr/sbin/aide --init
   async: 1800
   poll: 30
   register: aide_out
-  changed_when: "'AIDE initialized database' in aide_out.stdout"
+  changed_when: aide_out.rc == 0
   when:
     - rhel9stig_stigrule_258134_Manage
-    - >
-      (aide_db_stat.stat.exists and (aide_check_output.stderr | length > 0))
-      or (not aide_db_stat.stat.exists)
+    - not aide_db_stat.stat.exists
+
+- name: Stat newly (re)initialized AIDE database
+  ansible.builtin.stat:
+    path: /var/lib/aide/aide.db.new.gz
+    get_checksum: false
+    get_mime: false
+  register: aide_new_db_stat
+  when:
+    - rhel9stig_stigrule_258134_Manage
+    - aide_out is not skipped
 
 - name: stigrule_258134__rename_AIDE_db
   ansible.builtin.command: mv -f /var/lib/aide/aide.db.new.gz /var/lib/aide/aide.db.gz
@@ -3990,7 +4145,7 @@
   register: aide_move
   when:
     - rhel9stig_stigrule_258134_Manage
-    - aide_out.changed
+    - aide_new_db_stat.stat.exists | default(false)
 
 # R-258135 RHEL-09-651015
 - name: stigrule_258135__ensure_aide_present
@@ -4001,7 +4156,7 @@
 
 - name: stigrule_258135__ensure_mailx_present
   ansible.builtin.dnf:
-    name: mailx
+    name: s-nail
     state: present
   when: rhel9stig_stigrule_258135_Manage
 
@@ -4064,7 +4219,6 @@
     - aide_missing_sha512 | default('0') | int > 0
   register: aide_sha512
   changed_when: aide_sha512.rc == 0
-  notify: restart_aide
 
 # R-258137 RHEL-09-651025
 - name: stigrule_258137__protect_audit_tools_with_aide
@@ -4076,7 +4230,6 @@
     group: root
     mode: '0640'
   loop: "{{ rhel9stig_stigrule_audit_tool_bins }}"
-  notify: restart_aide
   when:
     - rhel9stig_stigrule_258137_Manage
     - aide_conf.stat.exists | default(false)
@@ -4097,7 +4250,6 @@
     - aide_missing_acl | default('0') | int > 0
   register: aide_acl
   changed_when: aide_acl.rc == 0
-  notify: restart_aide
 
 # V-258139 RHEL-09-651035
 - name: stigrule_258139__ensure_aide_xattrs
@@ -4115,7 +4267,6 @@
     - aide_missing_xattrs | default('0') | int > 0
   register: aide_xattrs
   changed_when: aide_xattrs.rc == 0
-  notify: restart_aide
 
 # R-258143 RHEL-09-652025
 - name: Find rsyslog remote log reception directives
@@ -4280,32 +4431,6 @@
     label: "{{ item.path }}"
   when: rhel9stig_stigrule_258167_Manage
 
-# R-258171 RHEL-09-653110
-- name: Find audit rule and configuration files
-  ansible.builtin.find:
-    paths:
-      - /etc/audit/rules.d
-      - /etc/audit
-    patterns:
-      - '*.rules'
-      - 'auditd.conf'
-      - 'audit.rules'
-    recurse: false
-    file_type: file
-  register: audit_config_files
-  when: rhel9stig_stigrule_258171_Manage
-
-- name: stigrule_258171__restrict_audit_configuration_access
-  ansible.builtin.file:
-    path: "{{ item.path }}"
-    owner: root
-    group: root
-    mode: '0600'
-  loop: "{{ audit_config_files.files | default([]) }}"
-  loop_control:
-    label: "{{ item.path }}"
-  when: rhel9stig_stigrule_258171_Manage
-
 # R-258173 RHEL-09-653120
 - name: Check the current audit_backlog_limit
   ansible.builtin.shell:
@@ -4339,6 +4464,7 @@
   when:
     - rhel9stig_stigrule_258174_Manage
     - rhel9stig_stigrule_258174_root_alias | length > 0
+    - "'postfix' in ansible_facts.packages"
 
 - name: stigrule_258174__rebuild_aliases_database
   ansible.builtin.command: newaliases
@@ -4346,6 +4472,7 @@
   changed_when: audit_newaliases.rc == 0
   when:
     - rhel9stig_stigrule_258174_Manage
+    - "'postfix' in ansible_facts.packages"
     - root_alias.changed # noqa:no-handler
 
 - name: stigrule_258174__report_no_root_alias
@@ -4389,6 +4516,36 @@
 
 - name: Run pending handlers
   ansible.builtin.meta: flush_handlers
+
+# R-258171 RHEL-09-653110
+# Runs after the R-258215/R-258216 audit-rule edits (and their augenrules_load
+# handler flush above) because `augenrules --load` regenerates
+# /etc/audit/audit.rules from /etc/audit/rules.d/*.rules using its own default
+# permissions, undoing this lockdown if it ran any earlier.
+- name: Find audit rule and configuration files
+  ansible.builtin.find:
+    paths:
+      - /etc/audit/rules.d
+      - /etc/audit
+    patterns:
+      - '*.rules'
+      - 'auditd.conf'
+      - 'audit.rules'
+    recurse: false
+    file_type: file
+  register: audit_config_files
+  when: rhel9stig_stigrule_258171_Manage
+
+- name: stigrule_258171__restrict_audit_configuration_access
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    owner: root
+    group: root
+    mode: '0600'
+  loop: "{{ audit_config_files.files | default([]) }}"
+  loop_control:
+    label: "{{ item.path }}"
+  when: rhel9stig_stigrule_258171_Manage
 
 # R-258231 RHEL-09-671015
 - name: Find interactive accounts not using a SHA-512 password hash
@@ -4561,22 +4718,10 @@
 - name: stigrule_270177__reinstall_crypto_policies
   ansible.builtin.command: dnf -y reinstall crypto-policies
   register: crypto_policies_ciphers_reinstall
-  changed_when: "'Nothing to do' not in crypto_policies_ciphers_reinstall.stdout"
+  changed_when: crypto_policies_ciphers_reinstall.rc == 0
   when:
     - rhel9stig_stigrule_270177_Manage
     - openssh_ciphers_check.stdout != (rhel9stig_stigrule_270177_approved_ciphers | join(","))
-
-- name: stigrule_270177__update_openssh_approved_ciphers
-  ansible.builtin.replace:
-    path: "{{ item }}"
-    regexp: "^(Ciphers[[:space:]]+).*"
-    replace: '\1{{ rhel9stig_stigrule_270177_approved_ciphers | join(",") }}'
-  loop:
-    - /usr/share/crypto-policies/FIPS/openssh.txt
-    - /usr/share/crypto-policies/back-ends/FIPS/openssh.config
-    - /etc/crypto-policies/back-ends/openssh.config
-  register: usr_share_update_ciphers
-  when: rhel9stig_stigrule_270177_Manage
 
 - name: stigrule_270177__set_fips_stig_crypto_policy
   ansible.builtin.command: "update-crypto-policies --set {{ rhel9stig_stigrule_crypto_policy }}"
@@ -4585,9 +4730,7 @@
   notify: reboot
   when:
     - rhel9stig_stigrule_270177_Manage
-    - >
-      crypto_policies_ciphers_reinstall.changed or
-      usr_share_update_ciphers.changed
+    - crypto_policies_ciphers_reinstall is changed
 
 - name: Run pending handlers
   ansible.builtin.meta: flush_handlers
@@ -4607,22 +4750,10 @@
 - name: stigrule_270178__reinstall_crypto_policies
   ansible.builtin.command: dnf -y reinstall crypto-policies
   register: crypto_policies_macs_reinstall
-  changed_when: "'Nothing to do' not in crypto_policies_macs_reinstall.stdout"
+  changed_when: crypto_policies_macs_reinstall.rc == 0
   when:
     - rhel9stig_stigrule_270178_Manage
     - openssh_macs_check.stdout != (rhel9stig_stigrule_270178_approved_macs | join(","))
-
-- name: stigrule_270178__update_openssh_approved_macs
-  ansible.builtin.replace:
-    path: "{{ item }}"
-    regexp: "^(MACs[[:space:]]+).*"
-    replace: '\1{{ rhel9stig_stigrule_270178_approved_macs | join(",") }}'
-  loop:
-    - /usr/share/crypto-policies/FIPS/openssh.txt
-    - /usr/share/crypto-policies/back-ends/FIPS/openssh.config
-    - /etc/crypto-policies/back-ends/openssh.config
-  register: usr_share_update_macs
-  when: rhel9stig_stigrule_270178_Manage
 
 - name: stigrule_270178__set_fips_stig_crypto_policy
   ansible.builtin.command: "update-crypto-policies --set {{ rhel9stig_stigrule_crypto_policy }}"
@@ -4631,9 +4762,7 @@
   notify: reboot
   when:
     - rhel9stig_stigrule_270178_Manage
-    - >
-      crypto_policies_macs_reinstall.changed or
-      usr_share_update_macs.changed
+    - crypto_policies_macs_reinstall is changed
 
 - name: Run pending handlers
   ansible.builtin.meta: flush_handlers

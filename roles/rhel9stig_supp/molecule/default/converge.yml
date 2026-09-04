@@ -1,0 +1,10 @@
+---
+- name: Converge
+  hosts: all
+  # The podman connection is already root in this minimal image, and sudo
+  # isn't installed on it - become: true would fail trying to invoke sudo.
+  become: false
+  tasks:
+    - name: Include rhel9stig_supp
+      ansible.builtin.include_role:
+        name: usmcguy.stigs.rhel9stig_supp
