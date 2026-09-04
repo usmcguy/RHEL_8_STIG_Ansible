@@ -1,4 +1,4 @@
-# usmcguy.rhel8 - Ansible Supplemental STIG Roles
+# usmcguy.stigs - Ansible Supplemental STIG Roles
 
 This repository contains the `usmcguy.stigs` Ansible collection of Supplemental STIG Roles intended to supplement DISA STIG content and help automate system hardening tasks across supported platforms and distributions.
 
